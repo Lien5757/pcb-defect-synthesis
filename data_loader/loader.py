@@ -39,7 +39,7 @@ class ImageOnlyTransform:
         sample["masked_image"] = masked
         return sample
     
-def load_train_data(data_dir, batch_size, isTransform=False):
+def load_train_data(data_dir, batch_size, isTransform=False, use_weighted_sampler=True):
     if isTransform:
         transform = ImageOnlyTransform(crop_size=(448, 448), flip_prob=0.5)
     else:
@@ -49,8 +49,10 @@ def load_train_data(data_dir, batch_size, isTransform=False):
     # PCBInpaintingDataset(base_dir=data_dir, transform=transform) # 舊版的
 
     ## sample weights
-    # sample_weights = compute_weights(dataset) # 會有權重過大，過度學習少樣本的問題
-    sample_weights = compute_soft_weights(dataset.class_labels, max_clip=0.05)
+    if use_weighted_sampler:
+        sample_weights = compute_soft_weights(dataset.class_labels, max_clip=0.05)
+    else:
+        sample_weights = [1.0] * len(dataset)
 
     sampler = WeightedRandomSampler(weights=sample_weights, num_samples=len(sample_weights), replacement=True)
     dataloader = DataLoader(dataset, batch_size=batch_size, sampler=sampler, num_workers=8, pin_memory=True)

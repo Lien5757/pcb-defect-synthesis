@@ -12,20 +12,21 @@ from data_loader.loader import load_train_data
 
 class StableDiffusionInpainterTrainer:
     def __init__(self, data_dir, project_name='exp1', isTransform=False, num_epochs=500, batch_size=1,
-                 lr=5e-7, weight_decay=1e-6, use_warmup=True, warmup_ratio=0.05):
+                 lr=5e-7, weight_decay=1e-6, use_warmup=True, warmup_ratio=0.05, use_weighted_sampler=True):
         today_str = datetime.now().strftime("%Y%m%d_%H-%M-%S")
 
         self.data_dir = data_dir
-        self.project_name = f"{project_name}_{today_str}" 
+        self.project_name = f"{project_name}_{today_str}"
         self.isTransform = isTransform
         self.num_epochs = num_epochs
         self.batch_size = batch_size
         self.lr = lr
         self.weight_decay = weight_decay
-        
+
         self.min_delta = 1e-4
         self.use_warmup = use_warmup
         self.warmup_ratio = warmup_ratio
+        self.use_weighted_sampler = use_weighted_sampler
 
         # Save checkpoint path
         self.save_dir = os.path.join('checkpoints', self.project_name)
@@ -127,8 +128,9 @@ class StableDiffusionInpainterTrainer:
         self.logger.info(f"Batch Size: {self.batch_size}")
         self.logger.info(f"Learning Rate: {self.lr} Weight Decay: {self.weight_decay}")
         self.logger.info(f"Use Warmup: {self.use_warmup} Warmup Ratio: {self.warmup_ratio}")
+        self.logger.info(f"Use Weighted Sampler: {self.use_weighted_sampler}")
 
-        dataset, dataloader, sample_weights = load_train_data(self.data_dir, self.batch_size, self.isTransform)
+        dataset, dataloader, sample_weights = load_train_data(self.data_dir, self.batch_size, self.isTransform, self.use_weighted_sampler)
         self.logger.info(f"Sample weights:{sample_weights}")
 
         # Warmup setup
@@ -231,12 +233,13 @@ if __name__ == "__main__":
         data_dir=r'datasets\train\AOI__dry_films(all)_prompt_exp5',
         project_name='exp5',
         isTransform=True,
-        num_epochs=500, # 600
-        batch_size=4, # 4
-        lr=1e-6, # 5e-7
+        num_epochs=500,
+        batch_size=4,
+        lr=1e-6,
         weight_decay=1e-6,
         use_warmup=True,
-        warmup_ratio=0.05 # 0.02
+        warmup_ratio=0.05,
+        use_weighted_sampler=True  # Set to False to disable weighted sampling
     )
 
     trainer.train()
