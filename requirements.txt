@@ -1,0 +1,11 @@
+torch==2.4.1
+torchvision
+diffusers
+transformers==4.46.3
+peft
+opencv-python
+matplotlib
+scikit-image
+tqdm
+pillow
+numpy
