@@ -58,58 +58,13 @@ def resize_images(data_dir, size=(512, 512)):
                 print(f"Skipped non-image file: {image_path}")
 
 if __name__ == "__main__":
-    import argparse
+    ## 1、 Check image size and filename =============================================================
+    ## 調整尺寸(不用更改檔名)
+    data_dir=r'datasets\train\AOI__dry_films(all)_prompt_exp5'
+    resize_images(data_dir)
 
-    parser = argparse.ArgumentParser(
-        description='Preprocess PCB defect images: resize and optionally rename with class structure'
-    )
-    parser.add_argument(
-        '--data_dir',
-        type=str,
-        required=True,
-        help='Path to data directory containing images/ folder'
-    )
-    parser.add_argument(
-        '--size',
-        type=int,
-        nargs=2,
-        default=[512, 512],
-        metavar=('WIDTH', 'HEIGHT'),
-        help='Target image size (default: 512 512)'
-    )
-    parser.add_argument(
-        '--rename_with_class',
-        action='store_true',
-        help='Rename files with class prefix (e.g., scratch_pcb_defect_000.png)'
-    )
-    parser.add_argument(
-        '--src_dir',
-        type=str,
-        default=None,
-        help='Source directory (required if --rename_with_class is set)'
-    )
-    parser.add_argument(
-        '--defect_name',
-        type=str,
-        default='scratch_pcb_defect',
-        help='Defect name prefix for renaming (default: scratch_pcb_defect)'
-    )
-
-    args = parser.parse_args()
-
-    size = tuple(args.size)
-
-    if args.rename_with_class:
-        if args.src_dir is None:
-            parser.error('--src_dir is required when using --rename_with_class')
-        print(f"Resizing and renaming images from {args.src_dir} to {args.data_dir}")
-        change_filename_with_class(
-            src_dir=args.src_dir,
-            dest_dir=args.data_dir,
-            defect_name=args.defect_name,
-            size=size
-        )
-    else:
-        print(f"Resizing images in {args.data_dir} to {size}")
-        resize_images(args.data_dir, size=size)
+    ## 調整尺寸+改檔名
+    # scr_dir=r'datasets\train\AOI__dry_films(all)_prompt_exp5\images'
+    # dest_dir=r'datasets\train\AOI__dry_films(all)_prompt_exp5'
+    # change_filename_with_class(src_dir=scr_dir, dest_dir=dest_dir, defect_name='scratch_pcb_defect')
 

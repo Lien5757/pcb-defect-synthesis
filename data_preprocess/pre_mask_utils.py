@@ -260,92 +260,25 @@ def draw_np_v2(image_dir, mask_dir, image_index=0):
     cv2.destroyAllWindows()
 
 if __name__ == "__main__":
-    import argparse
+    ## 2、 Draw masks ====================================================================================================  
+    ## 單獨選擇搭單一類別
+    # data_dir=r"datasets\AOI_dry_films\AOI__dry_films(all)_prompt_exp5_v2_relabel"
+    # image_dir=os.path.join(data_dir,"images")
+    # mask_dir=os.path.join(data_dir,"masks")
+    # defect_type='transparent'
 
-    parser = argparse.ArgumentParser(
-        description='Interactive tool to annotate defect masks on PCB images',
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog='''
-Keyboard shortcuts:
-  1/2/3     - Set brush size (small/medium/large)
-  S         - Save current mask and move to next image
-  N/P       - Next/previous image
-  B         - Undo last stroke
-  M         - Toggle between freehand and line drawing mode
-  D         - Discard current mask and start fresh
-  Q         - Quit tool
+    # draw_np_v2(image_dir=os.path.join(image_dir, defect_type), 
+    #                mask_dir=os.path.join(mask_dir, defect_type), 
+    #                image_index=0) # 選擇從第幾張開始
+    
+    ## 一次畫所有的類別
+    data_dir=r"datasets\train\AOI__dry_films(all)_prompt_exp5"
+    
+    image_dir=os.path.join(data_dir,"images")
+    mask_dir=os.path.join(data_dir,"masks")
 
-Examples:
-  # Annotate all classes
-  python pre_mask_utils.py --data_dir ./data
-
-  # Annotate specific class
-  python pre_mask_utils.py --data_dir ./data --class_name scratch
-
-  # Start from image 5
-  python pre_mask_utils.py --data_dir ./data --start_image 5
-        '''
-    )
-    parser.add_argument(
-        '--data_dir',
-        type=str,
-        required=True,
-        help='Path to data directory (must contain images/ and masks/ folders)'
-    )
-    parser.add_argument(
-        '--class_name',
-        type=str,
-        default=None,
-        help='Specific class to annotate (e.g., "scratch"). If None, annotates all classes.'
-    )
-    parser.add_argument(
-        '--start_image',
-        type=int,
-        default=0,
-        help='Image index to start from (default: 0)'
-    )
-    parser.add_argument(
-        '--version',
-        type=str,
-        choices=['v1', 'v2'],
-        default='v2',
-        help='Version of drawing tool (v1: basic, v2: advanced with line mode and shape filling)'
-    )
-
-    args = parser.parse_args()
-
-    image_dir = os.path.join(args.data_dir, "images")
-    mask_dir = os.path.join(args.data_dir, "masks")
-
-    if not os.path.exists(image_dir):
-        print(f"Error: {image_dir} does not exist!")
-        sys.exit(1)
-
-    # Choose drawing function
-    draw_func = draw_np_v2 if args.version == 'v2' else draw_np
-
-    if args.class_name:
-        # Annotate specific class
-        class_image_dir = os.path.join(image_dir, args.class_name)
-        class_mask_dir = os.path.join(mask_dir, args.class_name)
-
-        if not os.path.exists(class_image_dir):
-            print(f"Error: {class_image_dir} does not exist!")
-            sys.exit(1)
-
-        print(f"Annotating class: {args.class_name}")
-        draw_func(image_dir=class_image_dir, mask_dir=class_mask_dir, image_index=args.start_image)
-    else:
-        # Annotate all classes
-        classes = sorted(os.listdir(image_dir))
-        print(f"Found {len(classes)} classes: {classes}")
-
-        for class_name in classes:
-            class_image_dir = os.path.join(image_dir, class_name)
-            class_mask_dir = os.path.join(mask_dir, class_name)
-
-            if os.path.isdir(class_image_dir):
-                print(f"\n>>> Annotating class: {class_name}")
-                draw_func(image_dir=class_image_dir, mask_dir=class_mask_dir, image_index=args.start_image)
-
-    print("Mask annotation complete!")
+    classes = os.listdir(image_dir)
+    for class_name in classes:
+        draw_np_v2(image_dir=os.path.join(image_dir, class_name), 
+                   mask_dir=os.path.join(mask_dir, class_name), 
+                   image_index=0)
