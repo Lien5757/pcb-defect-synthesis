@@ -1,114 +1,9 @@
 import os
-import sys
 import cv2
 import numpy as np
-import shutil
 
-def draw_np(image_dir, mask_dir, image_index=0, isResize=True):
-    os.makedirs(mask_dir, exist_ok=True)
-
-    # 取得所有影像檔案
-    image_files = [f for f in os.listdir(image_dir) if f.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp'))]
-    
-
-    if not image_files:
-        print("No images found in the source directory.")
-        return
-
-    # 筆刷設定
-    brush_sizes = [20, 30, 50]
-    brush_index = 0
-    drawing = False
-    points = []
-    undo_stack = []
-
-    def mouse_event(event, x, y, flags, param):
-        nonlocal drawing, points, canvas, mask, undo_stack
-
-        if event == cv2.EVENT_LBUTTONDOWN:
-            drawing = True
-            points = [[x, y]]
-            # 儲存當前狀態（深拷貝）
-            undo_stack.append((canvas.copy(), mask.copy()))
-
-        elif event == cv2.EVENT_MOUSEMOVE and drawing:
-            points.append([x, y])
-            if len(points) >= 2:
-                cv2.line(canvas, tuple(points[-2]), tuple(points[-1]), (255, 255, 255, 255), brush_sizes[brush_index])
-                cv2.line(mask, tuple(points[-2]), tuple(points[-1]), (255, 255, 255), brush_sizes[brush_index])
-            cv2.imshow('Drawing Canvas', canvas)
-
-        elif event == cv2.EVENT_LBUTTONUP:
-            drawing = False
-            points = []
-
-    while image_index < len(image_files):
-        # 讀取影像
-        image_path = os.path.join(image_dir, image_files[image_index])
-        image = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
-
-        if isResize:
-            image = cv2.resize(image, (512,512))
-
-        if image is None:
-            print(f"Failed to load {image_files[image_index]}")
-            image_index += 1
-            continue
-
-        filename = image_files[image_index].split('.')[0]
-        mask_filename = f"{filename}.png"
-        
-        canvas = image.copy()
-        mask = np.zeros_like(image[:, :, 0])  # 建立與影像同尺寸的黑色畫布
-
-        cv2.namedWindow('Drawing Canvas')
-        cv2.setMouseCallback('Drawing Canvas', mouse_event)
-        cv2.imshow('Drawing Canvas', canvas)
-
-        while True:
-            key = cv2.waitKey(5) & 0xFF
-
-            if key == ord('q'):  # 退出
-                cv2.destroyAllWindows()
-                return
-            elif key == ord('b'):  # 復原
-                if undo_stack:
-                    canvas, mask = undo_stack.pop()
-                    cv2.imshow('Drawing Canvas', canvas)
-                    print("Undo one step.")
-                else:
-                    print("Nothing to undo.")
-            elif key == ord('1'):  # 細筆刷
-                brush_index = 0
-                print("Brush size: Small")
-            elif key == ord('2'):  # 中筆刷
-                brush_index = 1
-                print("Brush size: Medium")
-            elif key == ord('3'):  # 粗筆刷
-                brush_index = 2
-                print("Brush size: Large")
-            elif key == ord('s'):  # 儲存 mask 並切換到下一張
-                save_path = os.path.join(mask_dir, mask_filename)
-                cv2.imwrite(save_path, mask)
-                print(f"Saved mask: {save_path}")
-                image_index += 1
-                break
-            elif key == ord('n'):  # 切換到下一張
-                if image_index > 0:
-                    image_index += 1
-                    print(f"Next image: {image_files[image_index]}")
-                    break
-            elif key == ord('p'):  # 回到上一張
-                if image_index > 0:
-                    image_index -= 1
-                    print(f"Back to previous image: {image_files[image_index]}")
-                    break
-                else:
-                    print("Already at the first image.")
-
-    cv2.destroyAllWindows()
-
-def draw_np_v2(image_dir, mask_dir, image_index=0):
+def draw_np(image_dir, mask_dir, image_index=0):
+    """Interactive mask drawing tool with freehand and line modes"""
     os.makedirs(mask_dir, exist_ok=True)
 
     image_files = [f for f in os.listdir(image_dir) if f.lower().endswith(('.png', '.jpg', '.jpeg', '.bmp'))]
@@ -125,7 +20,7 @@ def draw_np_v2(image_dir, mask_dir, image_index=0):
     line_points = []       # store two click points
 
 
-    def mouse_event(event, x, y, flags, param):
+    def mouse_event(event, x, y, _flags, _param):
         nonlocal drawing, points, canvas, mask, undo_stack, line_points
 
         if drawing_mode == 'free':
@@ -259,26 +154,35 @@ def draw_np_v2(image_dir, mask_dir, image_index=0):
 
     cv2.destroyAllWindows()
 
+
 if __name__ == "__main__":
-    ## 2、 Draw masks ====================================================================================================  
-    ## 單獨選擇搭單一類別
-    # data_dir=r"datasets\AOI_dry_films\AOI__dry_films(all)_prompt_exp5_v2_relabel"
-    # image_dir=os.path.join(data_dir,"images")
-    # mask_dir=os.path.join(data_dir,"masks")
-    # defect_type='transparent'
+    # ============ CONFIG: Modify here to run different mask drawing tasks ============
+    MODE = "draw_all_classes"  # "draw_single_class" or "draw_all_classes"
 
-    # draw_np_v2(image_dir=os.path.join(image_dir, defect_type), 
-    #                mask_dir=os.path.join(mask_dir, defect_type), 
-    #                image_index=0) # 選擇從第幾張開始
-    
-    ## 一次畫所有的類別
-    data_dir=r"datasets\train\AOI__dry_films(all)_prompt_exp5"
-    
-    image_dir=os.path.join(data_dir,"images")
-    mask_dir=os.path.join(data_dir,"masks")
+    # ============ Task 1: Draw mask for a single defect class ============
+    if MODE == "draw_single_class":
+        data_dir = r"datasets\train\exp1"
+        defect_type = 'scratch'  # Modify to your target class
 
-    classes = os.listdir(image_dir)
-    for class_name in classes:
-        draw_np_v2(image_dir=os.path.join(image_dir, class_name), 
-                   mask_dir=os.path.join(mask_dir, class_name), 
-                   image_index=0)
+        image_dir = os.path.join(data_dir, "images")
+        mask_dir = os.path.join(data_dir, "masks")
+
+        print(f"Drawing masks for single class: {defect_type}")
+        draw_np(image_dir=os.path.join(image_dir, defect_type),
+                mask_dir=os.path.join(mask_dir, defect_type),
+                image_index=0)
+
+    # ============ Task 2: Draw masks for all defect classes ============
+    elif MODE == "draw_all_classes":
+        data_dir = r"datasets\train\exp1"
+
+        image_dir = os.path.join(data_dir, "images")
+        mask_dir = os.path.join(data_dir, "masks")
+
+        print(f"Drawing masks for all classes in: {data_dir}")
+        classes = os.listdir(image_dir)
+        for class_name in classes:
+            print(f"  Processing class: {class_name}")
+            draw_np(image_dir=os.path.join(image_dir, class_name),
+                    mask_dir=os.path.join(mask_dir, class_name),
+                    image_index=0)

@@ -3,7 +3,8 @@ import cv2
 import random
 import shutil
 
-def change_filename_with_class(src_dir, dest_dir, defect_name='scratch_pcb_defect', size=(512,512)):
+def change_filename_with_class(src_dir, dest_dir, defect_name, size=(512,512)):
+    """Resize and rename images by class with sequential numbering"""
     classes = os.listdir(src_dir)
     
     idx=0
@@ -27,6 +28,7 @@ def change_filename_with_class(src_dir, dest_dir, defect_name='scratch_pcb_defec
     print(f'Finished! Total is {idx}')
 
 def resize_images(data_dir, size=(512, 512)):
+    """Resize all images in dataset to specified dimensions"""
     image_dir=os.path.join(data_dir,'images')
     classes = os.listdir(image_dir)
     
@@ -58,13 +60,22 @@ def resize_images(data_dir, size=(512, 512)):
                 print(f"Skipped non-image file: {image_path}")
 
 if __name__ == "__main__":
-    ## 1、 Check image size and filename =============================================================
-    ## 調整尺寸(不用更改檔名)
-    data_dir=r'datasets\train\AOI__dry_films(all)_prompt_exp5'
-    resize_images(data_dir)
+    # ============ CONFIG ============
+    TASK = "resize"  # "resize" or "rename"
 
-    ## 調整尺寸+改檔名
-    # scr_dir=r'datasets\train\AOI__dry_films(all)_prompt_exp5\images'
-    # dest_dir=r'datasets\train\AOI__dry_films(all)_prompt_exp5'
-    # change_filename_with_class(src_dir=scr_dir, dest_dir=dest_dir, defect_name='scratch_pcb_defect')
+    # ============ Task 1: Resize (keep original filenames) ============
+    if TASK == "resize":
+        data_dir = r'datasets\train\exp1'
+        print(f"Resizing images in: {data_dir}")
+        resize_images(data_dir, size=(512, 512))
+
+    # ============ Task 2: Resize + Rename ============
+    elif TASK == "rename":
+        src_dir = r''
+        dest_dir = r'datasets\train\exp1'
+        print(f"Resizing and renaming images from: {src_dir}")
+        change_filename_with_class(src_dir=src_dir,
+                                   dest_dir=dest_dir,
+                                   defect_name='defect',
+                                   size=(512, 512))
 
