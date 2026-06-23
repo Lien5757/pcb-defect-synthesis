@@ -55,108 +55,45 @@ Includes: `diffusers`, `transformers==4.46.3`, `peft`, `opencv-python`, `matplot
 
 ### Data Preparation
 
-Organize your data as follows:
+See **[Data Preparation Guide](docs/data_preparation.md)** for detailed step-by-step instructions, including:
+- Image resizing (512×512)
+- Interactive mask annotation
+- Text prompt generation
+- Data completeness verification
+- Dataset design best practices
 
+Quick summary:
 ```
 data/
-├── images/           # Defect images (all classes mixed)
-├── masks/            # Binary masks marking defect regions (white = defect area)
-└── prompts/          # Text prompts per defect class (auto-generated)
+├── images/           # Defect images (organized by class)
+├── masks/            # Binary masks (white = defect region)
+└── texts/            # Text prompts per class
 ```
 
-**Data preparation steps:**
-
-```bash
-# 1. Resize images to 512×512
-python data_preprocess/pre_image_utils.py --data_dir ./data
-
-# 2. Annotate masks interactively (draw defect regions)
-python data_preprocess/pre_mask_utils.py --data_dir ./data
-
-# 3. Generate text prompts per class
-python data_preprocess/pre_prompt_utils.py --data_dir ./data
-
-# 4. Verify data completeness
-python data_preprocess/final_check.py --data_dir ./data
-```
-
-**Mask format:** Binary image matching source resolution. **White = region to synthesize defect into; Black = preserve as-is.** Freehand annotation is sufficient.
+**Mask format:** Binary PNG. White (255) = region to synthesize defect into; Black (0) = preserve as-is. Freehand annotation is sufficient.
 
 ---
 
 ## Training the SD Inpainting Model
 
-### Recommended: UNet Fine-tuning
+See **[Training Guide](docs/training.md)** for detailed parameters and setup.
 
-Fine-tune the full UNet component on your PCB defect samples:
+Key points:
+- Fine-tune the full UNet component (LoRA underperforms on industrial PCB data)
+- Typical command: `python SD_inpainting_train.py --data_dir ./data --project_name exp1 --num_epochs 500`
+- GPU: ~20–23 GB VRAM
+- For imbalanced data, use `--use_weighted_sampler` flag
+- Early stopping applied based on validation loss
 
-```bash
-python SD_inpainting_train.py \
-  --data_dir ./data \
-  --project_name exp1 \
-  --num_epochs 500 \
-  --batch_size 1 \
-  --lr 5e-7 \
-  --weight_decay 1e-6 \
-  --warmup_ratio 0.05
-```
-
-**Key parameters:**
-- `--lr 5e-7`: Low learning rate for stable fine-tuning
-- `--warmup_ratio 0.05`: Gradual warmup for first 5% of training
-- `--batch_size 1`: Limited by VRAM (typical on 24GB GPUs); increase if possible
-- `--num_epochs 500`: Early stopping applied internally based on validation loss
-
-**GPU Requirements:**
-- Training: ~20.6 GB VRAM (RTX 4090, BS=1) or ~22.6 GB (BS=4)
-- Inference: ~11.6 GB VRAM (RTX 4090)
-
-Checkpoints are saved to `checkpoints/{project_name}/`.
-
-### Alternative: LoRA Fine-tuning
-
-For memory-constrained setups, use LoRA-based fine-tuning:
-
-```bash
-python SD_inpainting_lora_main.py \
-  --data_dir ./data \
-  --project_name exp_lora \
-  --num_epochs 500 \
-  --batch_size 1 \
-  --lr 5e-7
-```
-
-**Note:** LoRA fine-tuning in the industrial PCB domain produces inconsistent results due to the domain gap between pre-trained natural images and industrial product images. See [A Note on LoRA Fine-tuning](#a-note-on-lora-fine-tuning).
-
-### Key Insights from Experiments
-
-Three dataset configurations (Dataset 1–3) with increasing semantic complexity were tested. Key findings:
-
-**Quality over quantity:**  
-Stable Diffusion is sensitive to semantic clarity. With precise prompts and well-annotated masks, 50 samples per class can yield stable generation. Vague semantics or many classes with very few samples causes collapse (color/texture distortion).
-
-**Example effective class structure:**
-- "A dark blue dry film residual defect" (50 samples)
-- "A light blue dry film residual defect" (50 samples)
-- (continue with clear color/type distinctions per class)
-
-**Weighted sampling for imbalance:**  
-If your dataset has severe class imbalance, use:
-
-```bash
-python SD_inpainting_train.py \
-  --data_dir ./data \
-  --use_weighted_sampler    # Upsamples minority classes each batch
-```
-
-This was critical for Dataset 3 (8 imbalanced classes): without it, minority classes produced severely distorted outputs.
+See [A Note on LoRA Fine-tuning](#a-note-on-lora-fine-tuning) for why full UNet is recommended.
 
 ---
 
 ## Inference: Generating Synthetic Defects
 
-Once trained, generate synthetic defects:
+See **[Inference Guide](docs/inference.md)** for detailed parameters and usage.
 
+Basic command:
 ```bash
 python SD_inpainting_predict.py \
   --model_path checkpoints/exp1/best_model.pt \
@@ -164,20 +101,10 @@ python SD_inpainting_predict.py \
   --output_dir ./output
 ```
 
-**Inputs (triplet per sample):**
-1. **Clean base image** — defect-free PCB
-2. **Binary mask** — marks region where defect should appear (white = generate here)
-3. **Text prompt** — describes defect semantically ("A dark blue dry film residual defect")
+**Inputs:** Clean image + binary mask + text prompt  
+**Outputs:** Synthetic defect images in `Inpainted_results/`, comparison grids, and masks
 
-**Outputs:**
-- `Inpainted_results/` — final synthetic defect images
-- `Combine_grid/` — side-by-side comparison grids
-- `Masks/` — applied masks
-- `Batch_grid/` — batch overview grids
-
-These synthetic images are ready to mix into your classifier's training set.
-
-**Important:** Mask shape must be semantically consistent with the prompt. A thin mask with a blob-defect prompt causes generation failure — this is a semantic mismatch, not a model issue.
+**Important:** Mask shape must match prompt semantically. Thin mask + "large blob" prompt = failure (semantic mismatch, not model bug).
 
 ---
 
@@ -222,20 +149,7 @@ SD Inpainting was also tested on a separate Tray dataset (5 defect classes, as f
 
 ---
 
-## Dataset Design Guidelines
-
-Based on the three-dataset experimental series (Dataset 1–3), here are the practical takeaways:
-
-**Do:**
-- Split classes by visual characteristic (color, shape) with clear, specific prompts
-- Use descriptive prompts: `"A dark blue dry film residual defect"` rather than `"A blue defect"`
-- Aim for at least 50 samples per class with balanced distribution across classes
-- Use rough freehand masks — preserving natural edge variation helps the model learn shape diversity
-
-**Avoid:**
-- Mixing visually diverse defects into a single class (ambiguous semantics → generation collapse)
-- Many classes with very few samples each (leads to color confusion and texture distortion)
-- Mask shape that is semantically inconsistent with the prompt
+For dataset design best practices and guidelines, see [Data Preparation Guide](docs/data_preparation.md).
 
 ---
 
