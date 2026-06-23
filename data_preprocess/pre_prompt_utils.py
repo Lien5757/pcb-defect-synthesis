@@ -120,10 +120,44 @@ def copy_all_files(data_dir, target_dir):
 
     print(f"All files copied to {target_dir} successfully.")
 
-if __name__ == "__main__":   
-    ## 3、 Set prompt ==================================================================================
-    # save_prompts_scratch(data_dir=r'datasets\AOI_06_sratch(512x512))
+if __name__ == "__main__":
+    import argparse
 
-    # save_prompts_tray(data_dir=r'D:\Tray_datasets\Tray_exp1')
+    parser = argparse.ArgumentParser(
+        description='Generate text prompts for PCB defect classes'
+    )
+    parser.add_argument(
+        '--data_dir',
+        type=str,
+        required=True,
+        help='Path to data directory containing images/ folder'
+    )
+    parser.add_argument(
+        '--prompt_type',
+        type=str,
+        choices=['dry_film', 'scratch', 'tray'],
+        default='dry_film',
+        help='Type of defect for prompt generation (default: dry_film)'
+    )
+    parser.add_argument(
+        '--copy_to_dir',
+        type=str,
+        default=None,
+        help='Optional: copy all files (images, masks, texts) to a single directory'
+    )
 
-    save_prompts_dry_film(data_dir=r'datasets\AOI_dry_films\AOI__dry_films(all)_prompt_exp5_v2(100)_9')
+    args = parser.parse_args()
+
+    if args.prompt_type == 'dry_film':
+        print(f"Generating dry film prompts for {args.data_dir}")
+        save_prompts_dry_film(data_dir=args.data_dir)
+    elif args.prompt_type == 'scratch':
+        print(f"Generating scratch prompts for {args.data_dir}")
+        save_prompts_scratch(data_dir=args.data_dir)
+    elif args.prompt_type == 'tray':
+        print(f"Generating tray prompts for {args.data_dir}")
+        save_prompts_tray(data_dir=args.data_dir)
+
+    if args.copy_to_dir:
+        print(f"Copying all files to {args.copy_to_dir}")
+        copy_all_files(data_dir=args.data_dir, target_dir=args.copy_to_dir)

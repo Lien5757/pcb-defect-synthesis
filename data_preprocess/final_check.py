@@ -27,5 +27,19 @@ def check_data_all_set(data_dir):
     print('All the data is paired!')
 
 if __name__ == "__main__":
-    ## 4、 Final check ====================================================================================================  
-    check_data_all_set(data_dir=r'datasets\train\AOI__dry_films(all)_prompt_exp5')
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        description='Verify that all data (images, masks, prompts) is properly paired'
+    )
+    parser.add_argument(
+        '--data_dir',
+        type=str,
+        required=True,
+        help='Path to data directory containing images/, masks/, and texts/ folders'
+    )
+
+    args = parser.parse_args()
+
+    print(f"Checking data completeness in {args.data_dir}...")
+    check_data_all_set(data_dir=args.data_dir)
