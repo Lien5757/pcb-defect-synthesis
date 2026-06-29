@@ -244,7 +244,7 @@ def parse_args():
     parser.add_argument("--use_warmup", action="store_true", help="Enable warmup")
     parser.add_argument("--warmup_ratio", type=float, default=None, help="Warmup ratio")
     parser.add_argument("--use_weighted_sampler", action="store_true", help="Enable weighted sampler")
-    parser.add_argument("--min_delta", type=float, default=None, help="Min delta for early stopping")
+    parser.add_argument("--min_delta", type=float, default=None, help="Min delta for loss tracking")
     parser.add_argument("--save_interval", type=int, default=None, help="Checkpoint save interval")
     return parser.parse_args()
 
