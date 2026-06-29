@@ -144,7 +144,14 @@ Before finalizing any refactor:
   - [x] Add backward compatibility with string conversion
   - [x] Benefits: type safety, IDE autocomplete, catch typos
 
-- [ ] **2.6** Separate data loading from augmentation (optional)
+- [x] **2.6** Unify prompt configuration into JSON
+  - [x] Create `config/prompts.json` with all dataset prompt mappings
+  - [x] Create `utils/prompt_loader.py` for unified config access
+  - [x] Simplify `utils/prompt_utils.py` (remove hardcoded if-elif chains)
+  - [x] Update `data_preprocess/pre_prompt_utils.py` to use config
+  - [x] Benefits: configuration-driven, single source of truth, -67 LOC
+
+- [ ] **2.7** Separate data loading from augmentation (optional)
   - [ ] Create: `load_data()` and `apply_augmentation()` as separate steps
   - [ ] Update: `loader.py` to call both sequentially
   - [ ] Benefits: easier testing, reusable augmentation
@@ -327,5 +334,11 @@ After each session, update this:
 ---
 
 **Last Updated:** 2026-06-29  
-**Status:** Phase 2.1-2.5 Complete (~80% Phase 2) → Ready for Phase 3 or remaining Phase 2  
-**Next Action:** Phase 3 (Polish/Development Experience) or Phase 2.6 (separate data loading)
+**Status:** Phase 2.1-2.6 Complete (~90% Phase 2) → Ready for Phase 3  
+**Summary:**
+- ✅ Code Quality: Type hints, docstrings, Enum for safety
+- ✅ Dead Code: Removed 26 LOC + 67 LOC from prompts
+- ✅ Configuration: Unified prompt config (JSON)
+- ✅ Maintainability: Significant improvements across codebase
+
+**Next Action:** Phase 3 (Polish/Development Experience)
