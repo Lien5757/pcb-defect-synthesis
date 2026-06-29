@@ -1,6 +1,7 @@
 import os
 import time
 import logging
+import argparse
 from datetime import datetime
 import torch
 import torch.nn.functional as F
@@ -11,30 +12,30 @@ from transformers import get_linear_schedule_with_warmup
 # Import utils
 from utils.plot_utils import show_batch_images_and_masks, plot_loss_live, plot_lr
 from data_loader.loader import load_train_data
+from config import TrainingConfig
 
 class StableDiffusionInpainterTrainer:
-    def __init__(self, data_dir, project_name='exp1', isTransform=False, num_epochs=500, batch_size=1,
-                 lr=5e-7, weight_decay=1e-6, use_warmup=True, warmup_ratio=0.05, use_weighted_sampler=True):
+    def __init__(self, config: TrainingConfig):
         today_str = datetime.now().strftime("%Y%m%d_%H-%M-%S")
 
-        self.data_dir = data_dir
-        self.project_name = f"{project_name}_{today_str}"
-        self.isTransform = isTransform
-        self.num_epochs = num_epochs
-        self.batch_size = batch_size
-        self.lr = lr
-        self.weight_decay = weight_decay
-
-        self.min_delta = 1e-4
-        self.use_warmup = use_warmup
-        self.warmup_ratio = warmup_ratio
-        self.use_weighted_sampler = use_weighted_sampler
+        self.config = config
+        self.data_dir = config.data_dir
+        self.project_name = f"{config.project_name}_{today_str}"
+        self.is_transform = config.is_transform
+        self.num_epochs = config.num_epochs
+        self.batch_size = config.batch_size
+        self.lr = config.lr
+        self.weight_decay = config.weight_decay
+        self.min_delta = config.min_delta
+        self.use_warmup = config.use_warmup
+        self.warmup_ratio = config.warmup_ratio
+        self.use_weighted_sampler = config.use_weighted_sampler
+        self.save_interval = config.save_interval
 
         # Save checkpoint path
         self.save_dir = os.path.join('checkpoints', self.project_name)
         os.makedirs(self.save_dir, exist_ok=True)
 
-        self.save_interval = 200
         self.resume_path = os.path.join(self.save_dir, "latest.pt")  
 
         self.device = "cuda:0" if torch.cuda.is_available() else "cpu"
@@ -132,7 +133,7 @@ class StableDiffusionInpainterTrainer:
         self.logger.info(f"Use Warmup: {self.use_warmup} Warmup Ratio: {self.warmup_ratio}")
         self.logger.info(f"Use Weighted Sampler: {self.use_weighted_sampler}")
 
-        dataset, dataloader, sample_weights = load_train_data(self.data_dir, self.batch_size, self.isTransform, self.use_weighted_sampler)
+        dataset, dataloader, sample_weights = load_train_data(self.data_dir, self.batch_size, self.is_transform, self.use_weighted_sampler)
         self.logger.info(f"Sample weights:{sample_weights}")
 
         # Warmup setup
@@ -230,18 +231,38 @@ class StableDiffusionInpainterTrainer:
         plot_lr(self.lr_history, self.save_dir)
         self.logger.info("Training Complete.")
 
-if __name__ == "__main__":
-    trainer = StableDiffusionInpainterTrainer(
-        data_dir=r'datasets\train\exp1',
-        project_name='exp1',
-        isTransform=True,
-        num_epochs=500,
-        batch_size=4,
-        lr=1e-6,
-        weight_decay=1e-6,
-        use_warmup=True,
-        warmup_ratio=0.05,
-        use_weighted_sampler=False
-    )
+def parse_args():
+    parser = argparse.ArgumentParser(description="Train SD Inpainting model")
+    parser.add_argument("--config", type=str, default=None, help="Path to config JSON file")
+    parser.add_argument("--data_dir", type=str, default=None, help="Path to training data")
+    parser.add_argument("--project_name", type=str, default=None, help="Project name")
+    parser.add_argument("--is_transform", action="store_true", help="Enable data augmentation")
+    parser.add_argument("--num_epochs", type=int, default=None, help="Number of epochs")
+    parser.add_argument("--batch_size", type=int, default=None, help="Batch size")
+    parser.add_argument("--lr", type=float, default=None, help="Learning rate")
+    parser.add_argument("--weight_decay", type=float, default=None, help="Weight decay")
+    parser.add_argument("--use_warmup", action="store_true", help="Enable warmup")
+    parser.add_argument("--warmup_ratio", type=float, default=None, help="Warmup ratio")
+    parser.add_argument("--use_weighted_sampler", action="store_true", help="Enable weighted sampler")
+    parser.add_argument("--min_delta", type=float, default=None, help="Min delta for early stopping")
+    parser.add_argument("--save_interval", type=int, default=None, help="Checkpoint save interval")
+    return parser.parse_args()
 
+
+if __name__ == "__main__":
+    args = parse_args()
+
+    # Load config from file if provided
+    if args.config:
+        config = TrainingConfig.from_json(args.config)
+    else:
+        # Use default config
+        config = TrainingConfig(data_dir=r'datasets\train\exp1')
+
+    # Override with CLI args
+    cli_args = {k: v for k, v in vars(args).items() if v is not None and k != 'config'}
+    if cli_args:
+        config.update_from_args(**cli_args)
+
+    trainer = StableDiffusionInpainterTrainer(config)
     trainer.train()
