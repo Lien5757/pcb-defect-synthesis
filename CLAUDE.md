@@ -132,16 +132,16 @@ Before finalizing any refactor:
   - [x] Tools: `pydoc` should render nicely
   - [ ] Remaining utility files (mask_utils, plot_utils, etc.)
 
-- [ ] **2.4** Remove unused code
-  - [ ] Delete `compute_weights()` from `loader.py` (6 LOC)
-  - [ ] Remove commented loss alternatives (4 LOC)
-  - [ ] Remove commented Tray dataset loop from predict (16 LOC)
-  - [ ] Verify tests still pass
+- [x] **2.4** Remove unused code
+  - [x] Delete `compute_weights()` from `loader.py` (6 LOC)
+  - [x] Remove commented loss alternatives (4 LOC)
+  - [x] Remove commented Tray dataset loop from predict (16 LOC)
+  - [x] Total removed: 26 LOC
 
 - [ ] **2.5** Use Enum for prompt_mode
   - [ ] Replace string `'multi'`/`'single'` with `PromptMode.MULTI` / `PromptMode.SINGLE`
   - [ ] Benefits: type safety, IDE autocomplete, catch typos
-  - [ ] File: `SD_inpainting_predict.py`
+  - [ ] File: `SD_inpainting_predict.py`, utils with prompt handling
 
 - [ ] **2.6** Separate data loading from augmentation
   - [ ] Create: `load_data()` and `apply_augmentation()` as separate steps
