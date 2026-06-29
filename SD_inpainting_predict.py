@@ -7,7 +7,7 @@ import cv2
 import random
 
 # Import utils
-from utils.image_utils import random_flip_rotate_pil
+from utils.augmentation import random_flip_rotate_pil
 from utils.mask_utils import random_transform
 from utils.prompt_utils import set_prompts, set_prompts_given
 from utils.load_model import load_model

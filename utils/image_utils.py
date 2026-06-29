@@ -1,32 +1,14 @@
 from PIL import Image, ImageDraw, ImageFont
 import numpy as np
-import random
 import cv2
 
 def resize_image(image, target_size=(512, 512)):
-    if isinstance(image, Image.Image):  
+    if isinstance(image, Image.Image):
         image = np.array(image)
 
     resized_image = cv2.resize(image, target_size, interpolation=cv2.INTER_NEAREST)
 
     return Image.fromarray(resized_image)
-
-def random_flip_rotate_pil(image):
-    """
-    Randomly flip (horizontal or vertical) and rotate (90, 180, or 270 degrees) a PIL image.
-    """
-    # Random flip
-    flip_mode = random.choice(['H', 'V', None])
-    if flip_mode == 'H':
-        image = image.transpose(Image.FLIP_LEFT_RIGHT)
-    elif flip_mode == 'V':
-        image = image.transpose(Image.FLIP_TOP_BOTTOM)
-
-    # Random rotation
-    rotation_angle = random.choice([90, 180, 270])
-    image = image.rotate(rotation_angle, expand=True)
-
-    return image
 
 def combine_image_grid_batch(image_lists):
     rows = len(image_lists)

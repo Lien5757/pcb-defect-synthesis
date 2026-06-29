@@ -1,43 +1,8 @@
-import random
 import numpy as np
 from collections import Counter
-from torchvision import transforms
 from torch.utils.data import DataLoader, WeightedRandomSampler
 from data_loader.datasets import InpaintingDataset
-
-class ImageOnlyTransform:
-    def __init__(self, crop_size=(448, 448), flip_prob=0.5):
-        self.crop_size = crop_size
-        self.flip_prob = flip_prob
-
-    def __call__(self, sample):
-        img, mask, masked = sample["defect_image"], sample["mask"], sample["masked_image"]
-
-        # Sample consistent crop
-        i, j, h, w = transforms.RandomCrop.get_params(img, self.crop_size)
-        img = transforms.functional.crop(img, i, j, h, w)
-        mask = transforms.functional.crop(mask, i, j, h, w)
-        masked = transforms.functional.crop(masked, i, j, h, w)
-
-        # Flip
-        if random.random() < self.flip_prob:
-            img = transforms.functional.hflip(img)
-            mask = transforms.functional.hflip(mask)
-            masked = transforms.functional.hflip(masked)
-
-        # Resize with proper interpolation
-        img = transforms.functional.resize(img, [512, 512], interpolation=transforms.InterpolationMode.BILINEAR)
-        mask = transforms.functional.resize(mask, [512, 512], interpolation=transforms.InterpolationMode.NEAREST)
-        masked = transforms.functional.resize(masked, [512, 512], interpolation=transforms.InterpolationMode.BILINEAR)
-
-        # Optional: Skip sample if mask is too small
-        if mask.sum() < 10:
-            return None  # Or re-sample
-
-        sample["defect_image"] = img
-        sample["mask"] = mask
-        sample["masked_image"] = masked
-        return sample
+from utils.augmentation import ImageOnlyTransform
     
 def load_train_data(data_dir, batch_size, isTransform=False, use_weighted_sampler=True):
     if isTransform:
