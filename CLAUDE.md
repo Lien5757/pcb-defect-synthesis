@@ -138,12 +138,13 @@ Before finalizing any refactor:
   - [x] Remove commented Tray dataset loop from predict (16 LOC)
   - [x] Total removed: 26 LOC
 
-- [ ] **2.5** Use Enum for prompt_mode
-  - [ ] Replace string `'multi'`/`'single'` with `PromptMode.MULTI` / `PromptMode.SINGLE`
-  - [ ] Benefits: type safety, IDE autocomplete, catch typos
-  - [ ] File: `SD_inpainting_predict.py`, utils with prompt handling
+- [x] **2.5** Use Enum for prompt_mode
+  - [x] Create config/enums.py with PromptMode enum
+  - [x] Replace string literals with `PromptMode.MULTI` / `PromptMode.SINGLE`
+  - [x] Add backward compatibility with string conversion
+  - [x] Benefits: type safety, IDE autocomplete, catch typos
 
-- [ ] **2.6** Separate data loading from augmentation
+- [ ] **2.6** Separate data loading from augmentation (optional)
   - [ ] Create: `load_data()` and `apply_augmentation()` as separate steps
   - [ ] Update: `loader.py` to call both sequentially
   - [ ] Benefits: easier testing, reusable augmentation
@@ -326,5 +327,5 @@ After each session, update this:
 ---
 
 **Last Updated:** 2026-06-29  
-**Status:** Phase 2.1 Complete → Ready for Phase 2.2  
-**Next Action:** Add type hints to all files (Phase 2.2)
+**Status:** Phase 2.1-2.5 Complete (~80% Phase 2) → Ready for Phase 3 or remaining Phase 2  
+**Next Action:** Phase 3 (Polish/Development Experience) or Phase 2.6 (separate data loading)
