@@ -3,6 +3,7 @@ import torch
 import numpy as np
 from PIL import Image
 from datetime import datetime
+from typing import List, Optional
 import cv2
 import random
 
@@ -16,7 +17,16 @@ from utils.save_results import save_inpainted_results
 
 
 class Inpainter:
-    def __init__(self, model_path, data_name='exp3', save_mode='grid',enable_aug_on_mask=True, enable_aug_on_base=True, scheduler_type='DDIM', device=None):
+    def __init__(
+        self,
+        model_path: str,
+        data_name: str = 'exp3',
+        save_mode: str = 'grid',
+        enable_aug_on_mask: bool = True,
+        enable_aug_on_base: bool = True,
+        scheduler_type: str = 'DDIM',
+        device: Optional[str] = None
+    ) -> None:
         self.device = device or ("cuda:0" if torch.cuda.is_available() else "cpu")
         self.pipe = load_model(model_path, device=self.device, scheduler_type=scheduler_type)
         self.data_name = data_name
@@ -32,7 +42,7 @@ class Inpainter:
 
         self.save_dir = os.path.join('output', project_name, f"{model_type}_{timestamp}")
 
-    def load_images(self, base_dir, mask_dir):
+    def load_images(self, base_dir: str, mask_dir: str) -> tuple[List[str], List[str]]:
         supported_extensions = ('.png', '.jpg', '.jpeg', '.bmp')
         base_images = [os.path.join(base_dir, f) for f in os.listdir(base_dir) if f.endswith(supported_extensions)]
         mask_images = [os.path.join(mask_dir, f) for f in os.listdir(mask_dir) if f.endswith(supported_extensions)]
@@ -47,12 +57,20 @@ class Inpainter:
 
         return base_images, match_mask_images
 
-    def process_mask(self, mask_path):
+    def process_mask(self, mask_path: str) -> Image.Image:
         mask = cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE)
         _, mask = cv2.threshold(mask, 0, 255, cv2.THRESH_BINARY)
         return Image.fromarray(mask)
 
-    def run(self, base_dir, mask_dir, prompt_mode='multi', prompt=None, batch_size=4, target_total=None):
+    def run(
+        self,
+        base_dir: str,
+        mask_dir: str,
+        prompt_mode: str = 'multi',
+        prompt: Optional[str] = None,
+        batch_size: int = 4,
+        target_total: Optional[int] = None
+    ) -> None:
         os.makedirs(self.save_dir, exist_ok=True)
 
         base_images, match_mask_images = self.load_images(base_dir, mask_dir)

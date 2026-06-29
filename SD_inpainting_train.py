@@ -54,7 +54,7 @@ class StableDiffusionInpainterTrainer:
         if self.resume_path:
             self._load_checkpoint(self.resume_path)
 
-    def _load_pipeline(self):
+    def _load_pipeline(self) -> StableDiffusionInpaintPipeline:
         pipe = StableDiffusionInpaintPipeline.from_pretrained(
             "runwayml/stable-diffusion-inpainting", torch_dtype=torch.float32
         )
@@ -67,7 +67,7 @@ class StableDiffusionInpainterTrainer:
             param.requires_grad = False
         return pipe
 
-    def _create_noise_scheduler(self):
+    def _create_noise_scheduler(self) -> DDIMScheduler:
         return DDIMScheduler(
             num_train_timesteps=1000,
             beta_start=0.00085,
@@ -78,7 +78,7 @@ class StableDiffusionInpainterTrainer:
             steps_offset=1
         )
 
-    def _load_checkpoint(self, path):
+    def _load_checkpoint(self, path: str) -> None:
         if not os.path.exists(path):
             self.logger.info(f"No checkpoint found at {path}. Starting fresh.")
             return
@@ -91,7 +91,7 @@ class StableDiffusionInpainterTrainer:
         self.best_loss = checkpoint.get("best_loss", self.best_loss)
         self.logger.info(f"Resumed training from epoch {self.start_epoch}")
 
-    def _save_checkpoint(self, epoch):
+    def _save_checkpoint(self, epoch: int) -> None:
         checkpoint = {
             "epoch": epoch,
             "model_state_dict": self.pipe.unet.state_dict(),
@@ -100,20 +100,19 @@ class StableDiffusionInpainterTrainer:
             "best_loss": self.best_loss
         }
         torch.save(checkpoint, os.path.join(self.save_dir, "latest.pt"))
-    
-    def _setup_logger(self):
+
+    def _setup_logger(self) -> logging.Logger:
         log_path = os.path.join(self.save_dir, "training.log")
         logger = logging.getLogger(self.project_name)
         logger.setLevel(logging.INFO)
 
-        formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')  # define first
+        formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 
         ch = logging.StreamHandler()
         ch.setLevel(logging.INFO)
         ch.setFormatter(formatter)
         logger.addHandler(ch)
 
-        # Avoid duplicate file handlers
         if not any(isinstance(h, logging.FileHandler) for h in logger.handlers):
             fh = logging.FileHandler(log_path)
             fh.setLevel(logging.INFO)
@@ -122,8 +121,7 @@ class StableDiffusionInpainterTrainer:
 
         return logger
 
-
-    def train(self):
+    def train(self) -> None:
         self.logger.info("Starting training...")
         self.logger.info(f"Data Dir: {self.data_dir}")
         self.logger.info(f"Project: {self.project_name}")
@@ -231,7 +229,7 @@ class StableDiffusionInpainterTrainer:
         plot_lr(self.lr_history, self.save_dir)
         self.logger.info("Training Complete.")
 
-def parse_args():
+def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Train SD Inpainting model")
     parser.add_argument("--config", type=str, default=None, help="Path to config JSON file")
     parser.add_argument("--data_dir", type=str, default=None, help="Path to training data")

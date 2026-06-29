@@ -1,6 +1,8 @@
 import random
+from typing import Dict, Any, Optional, Tuple
 from PIL import Image
 from torchvision import transforms
+import torch
 
 
 class ImageOnlyTransform:
@@ -8,11 +10,11 @@ class ImageOnlyTransform:
     Augmentation pipeline for inpainting data.
     Applies consistent transformations to image, mask, and masked_image triplets.
     """
-    def __init__(self, crop_size=(448, 448), flip_prob=0.5):
+    def __init__(self, crop_size: Tuple[int, int] = (448, 448), flip_prob: float = 0.5) -> None:
         self.crop_size = crop_size
         self.flip_prob = flip_prob
 
-    def __call__(self, sample):
+    def __call__(self, sample: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         img, mask, masked = sample["defect_image"], sample["mask"], sample["masked_image"]
 
         # Sample consistent crop
@@ -42,7 +44,7 @@ class ImageOnlyTransform:
         return sample
 
 
-def random_flip_rotate_pil(image):
+def random_flip_rotate_pil(image: Image.Image) -> Image.Image:
     """
     Randomly flip (H/V) and rotate (90/180/270°) a PIL image.
     """
