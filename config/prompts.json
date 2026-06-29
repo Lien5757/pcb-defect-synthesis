@@ -1,0 +1,48 @@
+{
+  "exp2": {
+    "0_blue_dry_film": "A blue dry film residual defect."
+  },
+  "exp3": {
+    "0_dark_blue": "A dark blue dry film residual defect.",
+    "1_dark_purple": "A dark purple dry film residual defect.",
+    "2_dark_yellow": "A dark yellow dry film residual defect.",
+    "3_light_blue": "A light blue dry film residual defect.",
+    "4_light_purple": "A light purple dry film residual defect.",
+    "5_light_yellow": "A light yellow dry film residual defect."
+  },
+  "exp4": {
+    "0_crash": "A crash defect on tray",
+    "1_scratch": "A scratch defect on tray",
+    "2_white_contamination": "White contamination defect on tray",
+    "3_red_contamination": "Red contamination defect on tray",
+    "4_foreign_matter": "Foreign matter defect on tray"
+  },
+  "exp5": {
+    "0_dark_blue": "A dark blue dry film residual defect.",
+    "1_dark_gray": "A dark gray dry film residual defect.",
+    "2_dark_yellow": "A dark yellow dry film residual defect.",
+    "3_light_blue": "A light blue dry film residual defect.",
+    "4_light_gray": "A light gray dry film residual defect.",
+    "5_light_yellow": "A light yellow dry film residual defect.",
+    "6_green": "A green dry film residual defect.",
+    "7_purple": "A purple dry film residual defect."
+  },
+  "exp5_v2": {
+    "0_dark_blue": "A dark blue dry film residual defect.",
+    "1_dark_gray": "A dark gray dry film residual defect.",
+    "2_dark_yellow": "A dark yellow dry film residual defect.",
+    "3_dark_purple": "A dark purple dry film residual defect.",
+    "4_light_blue": "A light blue dry film residual defect.",
+    "5_light_gray": "A light gray dry film residual defect.",
+    "6_light_yellow": "A light yellow dry film residual defect.",
+    "7_light_purple": "A light purple dry film residual defect.",
+    "8_green": "A green dry film residual defect."
+  },
+  "exp6": {
+    "0_crash": "A crash defect on tray",
+    "1_scratch": "A scratch defect on tray",
+    "2_white_contamination": "White contamination defect on tray",
+    "3_red_contamination": "Red contamination defect on tray",
+    "4_foreign_matter": "Foreign matter defect on tray"
+  }
+}
