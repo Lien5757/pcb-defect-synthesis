@@ -6,7 +6,15 @@ from torchvision import transforms
 import torch
 
 class InpaintingDataset(Dataset):
+    """PyTorch Dataset for inpainting task with images, masks, and text prompts."""
+
     def __init__(self, base_dir: str, transform: Optional[Any] = None) -> None:
+        """Initialize dataset from directory structure.
+
+        Args:
+            base_dir: Root directory containing 'images', 'masks', 'texts' subdirectories.
+            transform: Optional transform to apply to samples.
+        """
         self.image_root = os.path.join(base_dir, "images")
         self.mask_root = os.path.join(base_dir, "masks")
         self.text_root = os.path.join(base_dir, "texts")

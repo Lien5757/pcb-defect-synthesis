@@ -17,6 +17,8 @@ from utils.save_results import save_inpainted_results
 
 
 class Inpainter:
+    """Run inference with trained SD Inpainting model."""
+
     def __init__(
         self,
         model_path: str,
@@ -27,6 +29,17 @@ class Inpainter:
         scheduler_type: str = 'DDIM',
         device: Optional[str] = None
     ) -> None:
+        """Initialize inpainter with model and configuration.
+
+        Args:
+            model_path: Path to trained model checkpoint.
+            data_name: Dataset name for prompt selection.
+            save_mode: Output saving mode ('grid' or 'individual').
+            enable_aug_on_mask: Apply augmentation to masks.
+            enable_aug_on_base: Apply augmentation to base images.
+            scheduler_type: Noise scheduler type ('DDIM' or others).
+            device: Device to use ('cuda:0' or 'cpu'). Auto-detected if None.
+        """
         self.device = device or ("cuda:0" if torch.cuda.is_available() else "cpu")
         self.pipe = load_model(model_path, device=self.device, scheduler_type=scheduler_type)
         self.data_name = data_name
@@ -43,6 +56,15 @@ class Inpainter:
         self.save_dir = os.path.join('output', project_name, f"{model_type}_{timestamp}")
 
     def load_images(self, base_dir: str, mask_dir: str) -> tuple[List[str], List[str]]:
+        """Load base and mask images, matching them by count.
+
+        Args:
+            base_dir: Directory containing base images.
+            mask_dir: Directory containing mask images.
+
+        Returns:
+            Tuple of (base_image_paths, mask_image_paths) with matched lengths.
+        """
         supported_extensions = ('.png', '.jpg', '.jpeg', '.bmp')
         base_images = [os.path.join(base_dir, f) for f in os.listdir(base_dir) if f.endswith(supported_extensions)]
         mask_images = [os.path.join(mask_dir, f) for f in os.listdir(mask_dir) if f.endswith(supported_extensions)]
@@ -58,6 +80,14 @@ class Inpainter:
         return base_images, match_mask_images
 
     def process_mask(self, mask_path: str) -> Image.Image:
+        """Load and binarize mask image.
+
+        Args:
+            mask_path: Path to mask image.
+
+        Returns:
+            Binarized PIL Image.
+        """
         mask = cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE)
         _, mask = cv2.threshold(mask, 0, 255, cv2.THRESH_BINARY)
         return Image.fromarray(mask)
@@ -71,6 +101,16 @@ class Inpainter:
         batch_size: int = 4,
         target_total: Optional[int] = None
     ) -> None:
+        """Run inference on base images with masks and save results.
+
+        Args:
+            base_dir: Directory of base images.
+            mask_dir: Directory of mask images.
+            prompt_mode: 'multi' for dataset prompts or 'single' for custom prompt.
+            prompt: Custom prompt text (required if prompt_mode='single').
+            batch_size: Number of images per batch.
+            target_total: Total images to generate (replicates if needed).
+        """
         os.makedirs(self.save_dir, exist_ok=True)
 
         base_images, match_mask_images = self.load_images(base_dir, mask_dir)

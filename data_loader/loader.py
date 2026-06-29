@@ -11,6 +11,17 @@ def load_train_data(
     isTransform: bool = False,
     use_weighted_sampler: bool = True
 ) -> Tuple[InpaintingDataset, DataLoader, List[float]]:
+    """Load training dataset with optional augmentation and weighted sampling.
+
+    Args:
+        data_dir: Path to dataset root directory.
+        batch_size: Batch size for DataLoader.
+        isTransform: Enable data augmentation (crop, flip, resize).
+        use_weighted_sampler: Use weighted sampling to balance class distribution.
+
+    Returns:
+        Tuple of (dataset, dataloader, sample_weights).
+    """
     if isTransform:
         transform = ImageOnlyTransform(crop_size=(448, 448), flip_prob=0.5)
     else:
@@ -27,12 +38,25 @@ def load_train_data(
     return dataset, dataloader, sample_weights
 
 def compute_weights(dataset: InpaintingDataset) -> List[float]:
+    """Compute inverse class weights for balancing (deprecated, use compute_soft_weights)."""
     class_counts = np.bincount(dataset.class_labels)
     class_weights = 1. / class_counts
     sample_weights = [class_weights[c] for c in dataset.class_labels]
     return sample_weights
 
 def compute_soft_weights(group_labels: List[int], max_clip: float = 0.05) -> List[float]:
+    """Compute soft class weights with clipping and normalization.
+
+    Args:
+        group_labels: List of class labels for each sample.
+        max_clip: Maximum weight value after clipping.
+
+    Returns:
+        Normalized sample weights.
+
+    Raises:
+        ValueError: If computed weights sum to zero.
+    """
     group_counts = Counter(group_labels)
     print("class counts:", group_counts)
 

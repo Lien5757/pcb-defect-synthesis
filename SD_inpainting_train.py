@@ -15,7 +15,14 @@ from data_loader.loader import load_train_data
 from config import TrainingConfig
 
 class StableDiffusionInpainterTrainer:
+    """Train Stable Diffusion Inpainting model with UNet fine-tuning."""
+
     def __init__(self, config: TrainingConfig):
+        """Initialize trainer with configuration.
+
+        Args:
+            config: TrainingConfig object with all hyperparameters.
+        """
         today_str = datetime.now().strftime("%Y%m%d_%H-%M-%S")
 
         self.config = config
@@ -32,11 +39,10 @@ class StableDiffusionInpainterTrainer:
         self.use_weighted_sampler = config.use_weighted_sampler
         self.save_interval = config.save_interval
 
-        # Save checkpoint path
         self.save_dir = os.path.join('checkpoints', self.project_name)
         os.makedirs(self.save_dir, exist_ok=True)
 
-        self.resume_path = os.path.join(self.save_dir, "latest.pt")  
+        self.resume_path = os.path.join(self.save_dir, "latest.pt")
 
         self.device = "cuda:0" if torch.cuda.is_available() else "cpu"
         self.pipe = self._load_pipeline()
@@ -55,6 +61,7 @@ class StableDiffusionInpainterTrainer:
             self._load_checkpoint(self.resume_path)
 
     def _load_pipeline(self) -> StableDiffusionInpaintPipeline:
+        """Load and freeze VAE and text encoder from pretrained model."""
         pipe = StableDiffusionInpaintPipeline.from_pretrained(
             "runwayml/stable-diffusion-inpainting", torch_dtype=torch.float32
         )
@@ -68,6 +75,7 @@ class StableDiffusionInpainterTrainer:
         return pipe
 
     def _create_noise_scheduler(self) -> DDIMScheduler:
+        """Create DDIM scheduler for training."""
         return DDIMScheduler(
             num_train_timesteps=1000,
             beta_start=0.00085,
@@ -79,6 +87,11 @@ class StableDiffusionInpainterTrainer:
         )
 
     def _load_checkpoint(self, path: str) -> None:
+        """Load checkpoint to resume training from saved state.
+
+        Args:
+            path: Path to checkpoint file.
+        """
         if not os.path.exists(path):
             self.logger.info(f"No checkpoint found at {path}. Starting fresh.")
             return
@@ -92,6 +105,11 @@ class StableDiffusionInpainterTrainer:
         self.logger.info(f"Resumed training from epoch {self.start_epoch}")
 
     def _save_checkpoint(self, epoch: int) -> None:
+        """Save training checkpoint with model and optimizer states.
+
+        Args:
+            epoch: Current epoch number.
+        """
         checkpoint = {
             "epoch": epoch,
             "model_state_dict": self.pipe.unet.state_dict(),
@@ -102,6 +120,7 @@ class StableDiffusionInpainterTrainer:
         torch.save(checkpoint, os.path.join(self.save_dir, "latest.pt"))
 
     def _setup_logger(self) -> logging.Logger:
+        """Setup logger with both console and file handlers."""
         log_path = os.path.join(self.save_dir, "training.log")
         logger = logging.getLogger(self.project_name)
         logger.setLevel(logging.INFO)
@@ -122,6 +141,7 @@ class StableDiffusionInpainterTrainer:
         return logger
 
     def train(self) -> None:
+        """Execute full training loop with loss tracking and checkpointing."""
         self.logger.info("Starting training...")
         self.logger.info(f"Data Dir: {self.data_dir}")
         self.logger.info(f"Project: {self.project_name}")
@@ -230,6 +250,11 @@ class StableDiffusionInpainterTrainer:
         self.logger.info("Training Complete.")
 
 def parse_args() -> argparse.Namespace:
+    """Parse command-line arguments for training.
+
+    Returns:
+        Parsed arguments with config file and parameter overrides.
+    """
     parser = argparse.ArgumentParser(description="Train SD Inpainting model")
     parser.add_argument("--config", type=str, default=None, help="Path to config JSON file")
     parser.add_argument("--data_dir", type=str, default=None, help="Path to training data")

@@ -6,15 +6,27 @@ import torch
 
 
 class ImageOnlyTransform:
-    """
-    Augmentation pipeline for inpainting data.
-    Applies consistent transformations to image, mask, and masked_image triplets.
-    """
+    """Augmentation pipeline for inpainting data triplets (image, mask, masked_image)."""
+
     def __init__(self, crop_size: Tuple[int, int] = (448, 448), flip_prob: float = 0.5) -> None:
+        """Initialize augmentation with crop and flip parameters.
+
+        Args:
+            crop_size: Size to crop images to.
+            flip_prob: Probability of horizontal flip.
+        """
         self.crop_size = crop_size
         self.flip_prob = flip_prob
 
     def __call__(self, sample: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """Apply augmentations consistently to all three images in sample.
+
+        Args:
+            sample: Dictionary with 'defect_image', 'mask', 'masked_image' tensors.
+
+        Returns:
+            Augmented sample dict or None if mask is too small.
+        """
         img, mask, masked = sample["defect_image"], sample["mask"], sample["masked_image"]
 
         # Sample consistent crop
