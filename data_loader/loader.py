@@ -3,7 +3,7 @@ import numpy as np
 from collections import Counter
 from torchvision import transforms
 from torch.utils.data import DataLoader, WeightedRandomSampler
-from data_loader.datasets import InpaintingDataset, PCBInpaintingDataset
+from data_loader.datasets import InpaintingDataset
 
 class ImageOnlyTransform:
     def __init__(self, crop_size=(448, 448), flip_prob=0.5):
@@ -45,8 +45,6 @@ def load_train_data(data_dir, batch_size, isTransform=False, use_weighted_sample
     else:
         transform = None
     dataset = InpaintingDataset(base_dir=data_dir, transform=transform)
-    # InpaintingDataset(base_dir=data_dir, transform=transform) # 新版:三個資料夾的檔名一致
-    # PCBInpaintingDataset(base_dir=data_dir, transform=transform) # 舊版的
 
     ## sample weights
     if use_weighted_sampler:

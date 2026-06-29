@@ -11,6 +11,7 @@ python SD_inpainting_train.py \
   --lr 5e-7 \
   --weight_decay 1e-6 \
   --warmup_ratio 0.05
+  --use_weighted_sampler
 ```
 
 ## Parameters

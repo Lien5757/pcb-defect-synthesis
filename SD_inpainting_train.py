@@ -7,6 +7,8 @@ import torch.nn.functional as F
 from torch.optim import AdamW
 from diffusers import StableDiffusionInpaintPipeline, DDIMScheduler
 from transformers import get_linear_schedule_with_warmup
+
+# Import utils
 from utils.plot_utils import show_batch_images_and_masks, plot_loss_live, plot_lr
 from data_loader.loader import load_train_data
 
@@ -230,8 +232,8 @@ class StableDiffusionInpainterTrainer:
 
 if __name__ == "__main__":
     trainer = StableDiffusionInpainterTrainer(
-        data_dir=r'datasets\train\AOI__dry_films(all)_prompt_exp5',
-        project_name='exp5',
+        data_dir=r'datasets\train\exp1',
+        project_name='exp1',
         isTransform=True,
         num_epochs=500,
         batch_size=4,
@@ -239,7 +241,7 @@ if __name__ == "__main__":
         weight_decay=1e-6,
         use_warmup=True,
         warmup_ratio=0.05,
-        use_weighted_sampler=True  # Set to False to disable weighted sampling
+        use_weighted_sampler=False
     )
 
     trainer.train()
