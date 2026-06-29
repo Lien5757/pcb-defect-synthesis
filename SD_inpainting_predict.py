@@ -27,9 +27,10 @@ class Inpainter:
         project_name = os.path.basename(os.path.dirname(model_path))
         model_filename = os.path.basename(model_path)
 
-        model_type = os.path.splitext(model_filename)[0]   
+        model_type = os.path.splitext(model_filename)[0]
+        timestamp = datetime.now().strftime("%Y%m%d_%H-%M-%S")
 
-        self.save_dir = os.path.join('output', project_name, f"{model_type}_20221118")
+        self.save_dir = os.path.join('output', project_name, f"{model_type}_{timestamp}")
 
     def load_images(self, base_dir, mask_dir):
         supported_extensions = ('.png', '.jpg', '.jpeg', '.bmp')
