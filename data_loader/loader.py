@@ -37,13 +37,6 @@ def load_train_data(
     dataloader = DataLoader(dataset, batch_size=batch_size, sampler=sampler, num_workers=8, pin_memory=True)
     return dataset, dataloader, sample_weights
 
-def compute_weights(dataset: InpaintingDataset) -> List[float]:
-    """Compute inverse class weights for balancing (deprecated, use compute_soft_weights)."""
-    class_counts = np.bincount(dataset.class_labels)
-    class_weights = 1. / class_counts
-    sample_weights = [class_weights[c] for c in dataset.class_labels]
-    return sample_weights
-
 def compute_soft_weights(group_labels: List[int], max_clip: float = 0.05) -> List[float]:
     """Compute soft class weights with clipping and normalization.
 

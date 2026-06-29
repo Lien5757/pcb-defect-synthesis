@@ -126,11 +126,11 @@ Before finalizing any refactor:
   - [x] utils/image_utils.py - all functions annotated
   - [ ] Remaining utilities (mask_utils, plot_utils, predict, save_results, etc.)
 
-- [ ] **2.3** Add docstrings (Google style)
-  - [ ] Classes: 1-2 line purpose
-  - [ ] Public functions: param types, return type, 1 example
-  - [ ] Private functions: minimal (internal only)
-  - [ ] Tools: `pydoc` should render nicely
+- [x] **2.3** Add docstrings (Google style)
+  - [x] Classes: 1-2 line purpose (train, predict, datasets, augmentation)
+  - [x] Public functions: param types, return type descriptions
+  - [x] Tools: `pydoc` should render nicely
+  - [ ] Remaining utility files (mask_utils, plot_utils, etc.)
 
 - [ ] **2.4** Remove unused code
   - [ ] Delete `compute_weights()` from `loader.py` (6 LOC)

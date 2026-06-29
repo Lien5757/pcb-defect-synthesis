@@ -204,16 +204,9 @@ class StableDiffusionInpainterTrainer:
                 with torch.autocast(device_type=self.device, dtype=torch.float16):
                     noise_pred = self.pipe.unet(unet_input, timesteps, encoder_hidden_states=text_embeddings).sample
 
-                    # Match dtypes
-                    mask = mask.to(noise_pred.dtype) # torch.float16
-                    noise = noise.to(noise_pred.dtype) # torch.float16
+                    mask = mask.to(noise_pred.dtype)
+                    noise = noise.to(noise_pred.dtype)
 
-                    ## Loss(consider unmasked region)
-                    # loss_masked = F.mse_loss(noise_pred * mask, noise * mask) / (mask.mean() + 1e-6)
-                    # loss_global = F.mse_loss(noise_pred, noise)
-                    # loss = 0.9 * loss_masked + 0.1 * loss_global
-
-                    ## Loss
                     loss = F.mse_loss(noise_pred * mask, noise * mask) / (mask.mean() + 1e-6)
 
                 self.scaler.scale(loss).backward()

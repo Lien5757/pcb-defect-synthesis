@@ -156,41 +156,18 @@ class Inpainter:
         print('Inpainting process completed.')
 
 if __name__ == "__main__":
-    ## General Setup
     inpainter = Inpainter(
         model_path=r"checkpoints\exp5_fast_with_aug_ws_2\best_model.pt",
-        data_name="exp5", # 透過data_name去控制prompt為哪個project的(set_prompts)
-        save_mode="individual_with_3", # "individual" "individual_with_4"
-        enable_aug_on_base=True, # False
-        enable_aug_on_mask=True, # False
+        data_name="exp5",
+        save_mode="individual_with_3",
+        enable_aug_on_base=True,
+        enable_aug_on_mask=True,
         scheduler_type="DDIM"
     )
 
     inpainter.run(
         base_dir=r"datasets\test\AOI\base\clean_images_20221118",
         mask_dir=r"datasets\test\AOI\masks\draw_mask_04_dry_films(exp5)",
-        prompt_mode='multi', # 'multi' 'single'
-        # prompt='A scratch defect on tray', # 刮傷這種遮罩類型不能混用的案例(上方選'single')
-        batch_size=18, # 21:多跑幾次會out of memory
-        # target_total=1000 # 當base影像不夠多的時候用的
+        prompt_mode='multi',
+        batch_size=18,
     )
-
-    ## For Tray datasets, containing different type of base image
-    # data_dir = r'datasets\test\Tray\each_tray\base'
-    # base_lists = os.listdir(data_dir)
-
-    # remove_lists = ['Tray3_side1_P0-0-0','Tray3_side1_P0-0-1', 'Tray3_side1_P0-0-2','Tray3_side1_P0-0-3', 'Tray3_side1_P0-0-4','Tray3_side1_P0-0-5']
-    # base_lists = [item for item in base_lists if item not in remove_lists]
-
-    # for base_name in base_lists:
-    #     inpainter.run(
-    #         base_dir=fr"datasets\test\Tray\each_tray\base\{base_name}",
-    #         mask_dir=r"datasets\test\Tray\general\draw_masks_Tray",
-    #         save_dir=fr"output\exp6_Tray_no_aug\final_model(each)_2\{base_name}",
-    #         prompt_mode='multi', # 'multi' 'single'
-    #         # prompt='A scratch defect on tray',
-    #         batch_size=12,
-    #         target_total=100
-    #     )
-
-    
