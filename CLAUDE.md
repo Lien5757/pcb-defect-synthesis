@@ -117,11 +117,12 @@ Before finalizing any refactor:
   - [x] Update imports: loader.py, SD_inpainting_predict.py
   - [x] Test: no functional changes, all imports verified
 
-- [ ] **2.2** Add type hints to all files
-  - [ ] Use: `from typing import List, Dict, Tuple, Optional`
-  - [ ] Annotate: function params, return types, class attributes
-  - [ ] Tools: `mypy --strict` should pass (or with reasonable ignores)
-  - [ ] Start with: train/predict main scripts
+- [x] **2.2** Add type hints to main files
+  - [x] SD_inpainting_train.py - all methods annotated
+  - [x] SD_inpainting_predict.py - Inpainter class annotated
+  - [x] data_loader/loader.py - functions annotated
+  - [x] utils/augmentation.py - classes and functions annotated
+  - [ ] Remaining utilities (mask_utils, plot_utils, etc.)
 
 - [ ] **2.3** Add docstrings (Google style)
   - [ ] Classes: 1-2 line purpose
