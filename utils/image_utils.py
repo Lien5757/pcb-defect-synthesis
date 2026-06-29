@@ -1,8 +1,9 @@
 from PIL import Image, ImageDraw, ImageFont
 import numpy as np
 import cv2
+from typing import Tuple, Union
 
-def resize_image(image, target_size=(512, 512)):
+def resize_image(image: Union[Image.Image, np.ndarray], target_size: Tuple[int, int] = (512, 512)) -> Image.Image:
     if isinstance(image, Image.Image):
         image = np.array(image)
 
@@ -10,7 +11,7 @@ def resize_image(image, target_size=(512, 512)):
 
     return Image.fromarray(resized_image)
 
-def combine_image_grid_batch(image_lists):
+def combine_image_grid_batch(image_lists: list[list[Image.Image]]) -> Image.Image:
     rows = len(image_lists)
     cols = max(len(row) for row in image_lists)
 
@@ -23,22 +24,25 @@ def combine_image_grid_batch(image_lists):
 
     return combined
 
-def combine_image_with_prompt(base_img, mask_img, result_img, prompt, size=(256, 256)):
+def combine_image_with_prompt(
+    base_img: Image.Image,
+    mask_img: Image.Image,
+    result_img: Image.Image,
+    prompt: str,
+    size: Tuple[int, int] = (256, 256)
+) -> Image.Image:
     base = base_img.resize(size)
     mask = mask_img.resize(size)
     result = result_img.resize(size)
 
-    # 建立新畫布，包含上方文字空間
     width, height = size
     font_height = 24
     combined = Image.new('RGB', (width * 3, height + font_height), color=(255, 255, 255))
 
-    # 貼上圖像
     combined.paste(base, (0, font_height))
     combined.paste(mask, (width, font_height))
     combined.paste(result, (width * 2, font_height))
 
-    # 寫入 prompt 文字
     draw = ImageDraw.Draw(combined)
     try:
         font = ImageFont.truetype("arial.ttf", 16)

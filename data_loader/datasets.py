@@ -1,21 +1,21 @@
 from torch.utils.data import Dataset
 import os
-import re
+from typing import Dict, List, Tuple, Any, Optional
 from PIL import Image
 from torchvision import transforms
 import torch
 
 class InpaintingDataset(Dataset):
-    def __init__(self, base_dir, transform=None):
+    def __init__(self, base_dir: str, transform: Optional[Any] = None) -> None:
         self.image_root = os.path.join(base_dir, "images")
         self.mask_root = os.path.join(base_dir, "masks")
         self.text_root = os.path.join(base_dir, "texts")
         self.transform = transform
 
-        self.sample_list = []
-        self.class_labels = []
-        self.class_to_idx = {}
-        self.idx_to_class = {}
+        self.sample_list: List[Tuple[int, str, str, str, str, str]] = []
+        self.class_labels: List[int] = []
+        self.class_to_idx: Dict[str, int] = {}
+        self.idx_to_class: Dict[int, str] = {}
 
         class_names = sorted(os.listdir(self.image_root))
         for class_id, class_name in enumerate(class_names):
@@ -39,9 +39,8 @@ class InpaintingDataset(Dataset):
                     self.sample_list.append((
                         class_id, class_name, name, image_path, mask_path, text_path
                     ))
-                    self.class_labels.append(class_id)  # for weighted sampler
+                    self.class_labels.append(class_id)
 
-        # 預設 transforms
         self.image_transform = transforms.Compose([
             transforms.Resize((512, 512)),
             transforms.ToTensor(),
@@ -52,10 +51,10 @@ class InpaintingDataset(Dataset):
             transforms.ToTensor()
         ])
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.sample_list)
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx: int) -> Dict[str, Any]:
         class_id, class_name, name, image_path, mask_path, text_path = self.sample_list[idx]
 
         image = Image.open(image_path).convert("RGB")
