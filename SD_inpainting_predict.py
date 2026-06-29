@@ -14,6 +14,7 @@ from utils.prompt_utils import set_prompts, set_prompts_given
 from utils.load_model import load_model
 from utils.predict import predict_batch
 from utils.save_results import save_inpainted_results
+from config.enums import PromptMode
 
 
 class Inpainter:
@@ -96,7 +97,7 @@ class Inpainter:
         self,
         base_dir: str,
         mask_dir: str,
-        prompt_mode: str = 'multi',
+        prompt_mode: PromptMode | str = PromptMode.MULTI,
         prompt: Optional[str] = None,
         batch_size: int = 4,
         target_total: Optional[int] = None
@@ -106,11 +107,14 @@ class Inpainter:
         Args:
             base_dir: Directory of base images.
             mask_dir: Directory of mask images.
-            prompt_mode: 'multi' for dataset prompts or 'single' for custom prompt.
-            prompt: Custom prompt text (required if prompt_mode='single').
+            prompt_mode: PromptMode.MULTI for dataset prompts or PromptMode.SINGLE for custom.
+            prompt: Custom prompt text (required if prompt_mode=PromptMode.SINGLE).
             batch_size: Number of images per batch.
             target_total: Total images to generate (replicates if needed).
         """
+        if isinstance(prompt_mode, str):
+            prompt_mode = PromptMode(prompt_mode)
+
         os.makedirs(self.save_dir, exist_ok=True)
 
         base_images, match_mask_images = self.load_images(base_dir, mask_dir)
@@ -143,9 +147,9 @@ class Inpainter:
                     for p in mask_batch
                 ]
 
-            if prompt_mode == 'multi':
+            if prompt_mode == PromptMode.MULTI:
                 prompts = set_prompts(batch_size=len(base_batch), data=self.data_name)
-            elif prompt_mode == 'single':
+            elif prompt_mode == PromptMode.SINGLE:
                 prompts = set_prompts_given(batch_size=len(base_batch), prompt=prompt)
             results = predict_batch(self.pipe, base_batch, mask_batch, prompts, self.device)
 
@@ -168,6 +172,6 @@ if __name__ == "__main__":
     inpainter.run(
         base_dir=r"datasets\test\AOI\base\clean_images_20221118",
         mask_dir=r"datasets\test\AOI\masks\draw_mask_04_dry_films(exp5)",
-        prompt_mode='multi',
+        prompt_mode=PromptMode.MULTI,
         batch_size=18,
     )
