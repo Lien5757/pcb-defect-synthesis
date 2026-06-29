@@ -117,12 +117,14 @@ Before finalizing any refactor:
   - [x] Update imports: loader.py, SD_inpainting_predict.py
   - [x] Test: no functional changes, all imports verified
 
-- [x] **2.2** Add type hints to main files
+- [x] **2.2** Add type hints to primary files
   - [x] SD_inpainting_train.py - all methods annotated
   - [x] SD_inpainting_predict.py - Inpainter class annotated
   - [x] data_loader/loader.py - functions annotated
+  - [x] data_loader/datasets.py - InpaintingDataset class annotated
   - [x] utils/augmentation.py - classes and functions annotated
-  - [ ] Remaining utilities (mask_utils, plot_utils, etc.)
+  - [x] utils/image_utils.py - all functions annotated
+  - [ ] Remaining utilities (mask_utils, plot_utils, predict, save_results, etc.)
 
 - [ ] **2.3** Add docstrings (Google style)
   - [ ] Classes: 1-2 line purpose
