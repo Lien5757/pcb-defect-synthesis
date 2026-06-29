@@ -11,7 +11,7 @@ from transformers import get_linear_schedule_with_warmup
 
 # Import utils
 from utils.plot_utils import show_batch_images_and_masks, plot_loss_live, plot_lr
-from data_loader.loader import load_train_data
+from utils.loader import load_train_data
 from config import TrainingConfig
 
 class StableDiffusionInpainterTrainer:

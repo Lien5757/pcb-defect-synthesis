@@ -2,7 +2,7 @@ import numpy as np
 from collections import Counter
 from typing import Tuple, List
 from torch.utils.data import DataLoader, WeightedRandomSampler
-from data_loader.datasets import InpaintingDataset
+from utils.datasets import InpaintingDataset
 from utils.augmentation import ImageOnlyTransform
     
 def load_train_data(
