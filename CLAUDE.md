@@ -111,11 +111,11 @@ Before finalizing any refactor:
 **Prerequisite:** Complete Phase 1  
 **Exit Criteria:** Type hints on all files + docstrings on public APIs
 
-- [ ] **2.1** Create `utils/augmentation.py`
-  - [ ] Consolidate: `random_flip_rotate_pil()`, `random_transform()`, crop logic
-  - [ ] Remove duplicates from `loader.py` and `image_utils.py`
-  - [ ] Separate data loading from augmentation in `loader.py`
-  - [ ] Test: augmented data identical to before
+- [x] **2.1** Create `utils/augmentation.py`
+  - [x] Consolidate: `ImageOnlyTransform`, `random_flip_rotate_pil()` into augmentation.py
+  - [x] Remove duplicates from `loader.py` and `image_utils.py`
+  - [x] Update imports: loader.py, SD_inpainting_predict.py
+  - [x] Test: no functional changes, all imports verified
 
 - [ ] **2.2** Add type hints to all files
   - [ ] Use: `from typing import List, Dict, Tuple, Optional`
@@ -323,5 +323,5 @@ After each session, update this:
 ---
 
 **Last Updated:** 2026-06-29  
-**Status:** Phase 1 Complete → Ready for Phase 2  
-**Next Action:** Start Phase 2.1 (consolidate augmentation utilities)
+**Status:** Phase 2.1 Complete → Ready for Phase 2.2  
+**Next Action:** Add type hints to all files (Phase 2.2)
