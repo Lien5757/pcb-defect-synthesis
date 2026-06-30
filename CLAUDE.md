@@ -198,7 +198,14 @@ Before finalizing any refactor:
   - [x] Benefit: faster training, reduced disk I/O
   - [x] Test: loss.png still captures full training curve
 
-- [ ] **3.5** Update README with refined instructions
+- [x] **3.5** Simplify save_results & prompt reverse lookup ✅
+  - [x] Remove 3 save_mode variants (grid, individual, individual_with_4)
+  - [x] Keep only `individual_with_3` (base + mask + result grids)
+  - [x] Add `get_class_name_from_prompt()` for config-driven naming
+  - [x] New filename: `inpaint_{class_name}_{batch_idx}_{k}_{timestamp}.png`
+  - [x] Benefit: cleaner filenames, -65 LOC, config-validated prompts
+
+- [ ] **3.6** Update README with refined instructions
   - [ ] Quick start: 5 min setup
   - [ ] Config examples: different hardware/dataset sizes
   - [ ] Troubleshooting: common errors
@@ -333,34 +340,41 @@ After each session, update this:
 - [x] Task 3.2: Unify logging (logger everywhere)
 - [x] Task 3.4: Optimize plot saving (configurable interval)
 - [x] Task 3.3: Config file support with validation
+- [x] Task 3.5: Simplify save_results & prompt reverse lookup
 
 **Changes by User:**
-- Removed Task 3.5 (Document pick_color.py) - already deleted in Phase 1.5
+- Removed original Task 3.5 (Document pick_color.py) - already deleted in Phase 1.5
+- Added new improvement: save_results simplification + config-driven naming
 
 **Issues Found:**
 - None
 
 **Next Session:**
-- Start with Task 3.5 (Update README)
+- Start with Task 3.6 (Update README)
 
 ---
 
 **Last Updated:** 2026-06-30  
-**Status:** Phase 3.3 COMPLETE ✅ → 4/5 Phase 3 tasks done (3.5 removed)  
+**Status:** Phase 3.5 COMPLETE ✅ → 5/5 Phase 3 tasks done!  
 **Summary:**
-- ✅ 2.1: Augmentation consolidation → utils/augmentation.py
-- ✅ 2.2: Type hints on primary files (SD_inpainting_train/predict, loader, datasets)
-- ✅ 2.3: Docstrings (Google style) on public APIs
-- ✅ 2.4: Dead code cleanup (-26 LOC from train/predict, -67 LOC from prompts)
-- ✅ 2.5: Enum for prompt_mode (type safety)
-- ✅ 2.6: Prompt config unification (config/prompts.json + utils/prompt_loader.py)
-- ✅ 2.7: Module structure reorganization (utils/ consolidation)
+- ✅ 3.1: Error handling & validation (utils/validation.py)
+- ✅ 3.2: Logging unification (16 print→logger replacements)
+- ✅ 3.3: Config file support with validation (docs/config.md)
+- ✅ 3.4: Plot saving optimization (configurable interval)
+- ✅ 3.5: save_results simplification + prompt reverse lookup (-65 LOC)
 
-**Code Health Improvements:**
-- 🔧 Architecture: Cleaner module organization
-- 📝 Documentation: All public APIs documented
-- 🔒 Type Safety: Type hints throughout main pipeline
-- ⚙️ Configuration: JSON-driven prompts
-- 🧹 Code Quality: -93 LOC of dead/duplicate code
+**Code Health Improvements (Phase 3):**
+- 🛡️ Safety: Comprehensive validation & error handling
+- 📊 Observability: Consistent logging throughout
+- ⚙️ Configuration: JSON-driven, CLI override support
+- ⚡ Performance: Optimized plot I/O operations
+- 🧹 Code Quality: -65 LOC of simplified save logic, config-validated prompts
 
-**Next Action:** Phase 3 (Polish/Development Experience)
+**Overall Phase 3 Progress:**
+- ✅ Error handling & validation complete
+- ✅ Logging unified across all modules
+- ✅ Config file support with examples
+- ✅ Performance optimizations
+- ⏳ README documentation (final step)
+
+**Next Action:** Phase 3.6 (Update README - final polish for GitHub release)
