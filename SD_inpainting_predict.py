@@ -261,7 +261,7 @@ class Inpainter:
                     prompts = set_prompts_given(batch_size=len(base_batch), prompt=prompt)
 
                 results = predict_batch(self.pipe, base_batch, mask_batch, prompts, self.device)
-                save_inpainted_results(base_batch, mask_batch, results, prompts, self.save_dir, idx + 1, data_name=self.data_name, save_mode=self.save_mode)
+                save_inpainted_results(base_batch, mask_batch, results, prompts, self.save_dir, idx + 1, data_name=self.data_name)
 
             except Exception as e:
                 self.logger.error(f"Error processing batch {idx + 1}: {str(e)}")

@@ -57,3 +57,29 @@ def get_prompt_list(data: str, config_path: str = 'config/prompts.json') -> List
     """
     class_to_prompt = get_class_to_prompt_map(data, config_path)
     return list(class_to_prompt.values())
+
+
+def get_class_name_from_prompt(data: str, prompt: str, config_path: str = 'config/prompts.json') -> str:
+    """Get class name from prompt text (reverse lookup).
+
+    Args:
+        data: Dataset name (e.g., 'exp4', 'exp5').
+        prompt: Prompt text to lookup.
+        config_path: Path to prompt config JSON file.
+
+    Returns:
+        Class name (e.g., '0_dark_blue').
+
+    Raises:
+        ValueError: If dataset not found or prompt not found in dataset.
+    """
+    class_to_prompt = get_class_to_prompt_map(data, config_path)
+
+    for class_name, stored_prompt in class_to_prompt.items():
+        if stored_prompt == prompt:
+            return class_name
+
+    raise ValueError(
+        f"Prompt not found in dataset '{data}': {prompt}\n"
+        f"Available prompts: {list(class_to_prompt.values())}"
+    )

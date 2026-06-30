@@ -65,34 +65,6 @@ python SD_inpainting_train.py --config config/exp1.json --num_epochs 1000 --batc
 | `save_interval` | int | `200` | Save checkpoint every N epochs |
 | `plot_interval` | int | `10` | Update plot every N epochs |
 
-## Usage Examples
-
-### Example 1: Quick Experiment
-```bash
-python SD_inpainting_train.py --config config/exp1.json
-```
-
-### Example 2: Override Epochs and Batch Size
-```bash
-python SD_inpainting_train.py --config config/exp1.json --num_epochs 1000 --batch_size 8
-```
-
-### Example 3: Enable Augmentation
-```bash
-python SD_inpainting_train.py \
-  --data_dir ./datasets/train/exp1 \
-  --project_name exp1_with_aug \
-  --is_transform true \
-  --batch_size 4
-```
-
-### Example 4: Custom Learning Rate Schedule
-```bash
-python SD_inpainting_train.py \
-  --config config/exp1.json \
-  --lr 1e-6 \
-  --warmup_ratio 0.1
-```
 
 ## Creating Your Own Config
 
