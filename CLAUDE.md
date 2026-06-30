@@ -180,11 +180,11 @@ Before finalizing any refactor:
   - [x] Created utils/validation.py with comprehensive checks
   - [x] Enhanced train/predict with validation in critical paths
 
-- [ ] **3.2** Unify logging (use logger everywhere)
-  - [ ] Train: `logger.info()` ✓ (already done)
-  - [ ] Predict: replace `print()` → `logger.info()`
-  - [ ] Data prep: add logging for progress
-  - [ ] Format: `[%(asctime)s] %(levelname)s: %(message)s`
+- [x] **3.2** Unify logging (use logger everywhere) ✅
+  - [x] Train: `logger.info()` ✓ (already done)
+  - [x] Predict: replace `print()` → `logger.info()` (5 files, 16 statements)
+  - [x] Format: `[%(asctime)s] %(levelname)s: %(message)s`
+  - [ ] Data prep: add logging for progress (deferred, non-critical path)
 
 - [ ] **3.3** Support config file (JSON/YAML)
   - [ ] Accept: `python SD_inpainting_train.py --config path/to/config.json`
@@ -344,17 +344,18 @@ After each session, update this:
 **Phase:** 3 (Polish/Development Experience)  
 **Completed:**
 - [x] Task 3.1: Add error handling & validation
+- [x] Task 3.2: Unify logging (logger everywhere)
 
 **Issues Found:**
 - None
 
 **Next Session:**
-- Start with Task 3.2 (Unify logging)
+- Start with Task 3.3 (Config file support) or 3.4 (Plot optimization)
 
 ---
 
 **Last Updated:** 2026-06-30  
-**Status:** Phase 3.1 COMPLETE ✅ → Working on Phase 3  
+**Status:** Phase 3.2 COMPLETE ✅ → 2/6 Phase 3 tasks done  
 **Summary:**
 - ✅ 2.1: Augmentation consolidation → utils/augmentation.py
 - ✅ 2.2: Type hints on primary files (SD_inpainting_train/predict, loader, datasets)
