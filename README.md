@@ -101,114 +101,103 @@ and **prompt-guided synthesis** — advantages that raw recall numbers do not fu
 
 ```
 .
-├── 0_Introduction/          # Dataset overview and class definitions
-├── 1_Preprocess/
-│   ├── pre_image_utils.py   # Image renaming and resizing
-│   ├── pre_mask_utils.py    # Interactive mask annotation tool
-│   ├── pre_prompt_utils.py  # Text prompt generation per defect class
-│   └── final_check.py       # Data completeness verification
-├── 2_Training/
-│   └── SD_inpainting_train.py
-├── 3_Prediction/
-│   └── SD_inpainting_predict.py
-└── requirements.txt
+├── data_preprocess/          # Data preparation scripts
+│   ├── pre_image_utils.py
+│   ├── pre_mask_utils.py
+│   ├── pre_prompt_utils.py
+│   └── final_check.py
+├── config/                   # Configuration files
+│   ├── train_config.py
+│   ├── prompts.json
+│   └── enums.py
+├── utils/                    # Utility modules
+│   ├── loader.py             # Data loading
+│   ├── datasets.py           # PyTorch Dataset
+│   ├── augmentation.py       # Image augmentation
+│   ├── prompt_utils.py       # Prompt handling
+│   └── ...
+├── docs/                     # Documentation
+│   ├── data_preparation.md
+│   ├── data_annotation.md
+│   ├── dataset_design.md
+│   ├── training.md
+│   ├── inference.md
+│   └── config.md
+├── SD_inpainting_train.py    # Training entry point
+├── SD_inpainting_predict.py  # Inference entry point
+├── requirements.txt
+└── README.md
 ```
 
 ---
 
 ## Setup
 
-### Environment
+### Requirements
 
 ```bash
-# Python 3.10 + CUDA 11.8 required
-pip install torch==2.4.1 torchvision --index-url https://download.pytorch.org/whl/cu118
-pip install diffusers transformers==4.46.3 peft
-pip install opencv-python matplotlib scikit-image tqdm
+pip install -r requirements.txt
 ```
 
-### Hardware Requirements
+**Minimum:** Python 3.10, CUDA 11.8, **24 GB VRAM** (training)
 
-| Stage | VRAM Usage | Device Tested |
-|-------|-----------|---------------|
-| Training (AMP, BS=1) | 20.6 / 24 GB | RTX 4090 |
-| Training (AMP, BS=4) | 22.6 / 24 GB | RTX 4090 |
-| Inference (AMP, BS=1) | 11.6 / 24 GB (~3.4s/img) | RTX 4090 |
+See [requirements.txt](requirements.txt) for full dependency list.
 
-> Minimum **24 GB VRAM** required for training.  
-> Inference may be possible on 12 GB GPUs.  
-> Cloud alternative: Google Colab with A100.
+### Hardware
+
+| Task | VRAM | Device |
+|------|------|--------|
+| Train (BS=1) | 20.6 GB | RTX 4090 |
+| Train (BS=4) | 22.6 GB | RTX 4090 |
+| Inference | ~11.6 GB | RTX 4090 |
+
+> Inference may work on 12 GB GPUs; training requires 24 GB.
 
 ---
 
-## Data Preparation
+## Quick Start
 
-This repository does not include the PCB dataset. Prepare your own data in the following structure:
+### 1. Prepare Data
 
+```bash
+python data_preprocess/pre_image_utils.py      # Resize to 512×512
+python data_preprocess/pre_mask_utils.py       # Draw masks (interactive)
+python data_preprocess/pre_prompt_utils.py     # Generate text prompts
+python data_preprocess/final_check.py          # Verify completeness
 ```
-data/
-├── images/          # Defect images, named: pcb_defect_{idx}.png
-├── masks/           # Binary masks marking defect regions
-└── prompts/         # Text prompts per defect class (auto-generated)
+
+📖 **[Full Data Preparation Guide](docs/data_preparation.md)**
+
+### 2. Train
+
+```bash
+python SD_inpainting_train.py --data_dir ./data --project_name exp1
 ```
 
-**Naming convention:** filenames encode defect type — all files within the same class  
-share a consistent prefix (e.g., `scratch_001.png`, `scratch_002.png`).
+📖 **[Training Guide](docs/training.md)** | 📋 **[Config Reference](docs/config.md)**
+
+### 3. Inference
+
+```bash
+python SD_inpainting_predict.py \
+  --model_path checkpoints/exp1/best_model.pt \
+  --data_dir ./data
+```
+
+📖 **[Inference Guide](docs/inference.md)**
 
 ---
 
-## Usage
+## Documentation
 
-### Step 1 — Preprocess
-
-```bash
-# 1. Rename and resize images to 512x512
-python 1_Preprocess/pre_image_utils.py --data_dir ./data
-
-# 2. Annotate defect masks interactively
-python 1_Preprocess/pre_mask_utils.py --data_dir ./data
-```
-
-**Mask annotation keyboard shortcuts:**
-
-| Key | Action |
-|-----|--------|
-| `1` / `2` / `3` | Draw mask (brush sizes) |
-| `D` | Delete / erase |
-| `B` | Previous image |
-| `S` | Save current mask |
-| `P` / `N` | Navigate prev / next |
-
-```bash
-# 3. Generate text prompts per defect class
-python 1_Preprocess/pre_prompt_utils.py --data_dir ./data
-
-# 4. Verify all data is ready
-python 1_Preprocess/final_check.py --data_dir ./data
-```
-
-### Step 2 — Training
-
-```bash
-python 2_Training/SD_inpainting_train.py --data_dir ./data
-```
-
-### Step 3 — Inference
-
-```bash
-python 3_Prediction/SD_inpainting_predict.py \
-  --data_dir ./data \
-  --output_dir ./output
-```
-
-Output folders generated:
-
-| Folder | Content |
-|--------|---------|
-| `Inpainted_results/` | Final synthetic defect images |
-| `Combine_grid/` | Side-by-side comparison grids |
-| `Masks/` | Applied masks |
-| `Batch_grid/` | Batch overview grids |
+| Document | Purpose |
+|----------|---------|
+| [Data Preparation](docs/data_preparation.md) | Organize, annotate, prepare data |
+| [Data Annotation Details](docs/data_annotation.md) | Step-by-step annotation walkthrough |
+| [Dataset Design](docs/dataset_design.md) | Best practices + troubleshooting |
+| [Training Guide](docs/training.md) | Training parameters and techniques |
+| [Inference Guide](docs/inference.md) | Generate synthetic defects |
+| [Config Reference](docs/config.md) | Training config file format |
 
 ---
 

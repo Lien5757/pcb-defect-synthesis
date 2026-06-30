@@ -25,8 +25,7 @@ class Inpainter:
     def __init__(
         self,
         model_path: str,
-        data_name: str = 'exp3',
-        save_mode: str = 'grid',
+        data_name: str = 'exp1',
         enable_aug_on_mask: bool = True,
         enable_aug_on_base: bool = True,
         scheduler_type: str = 'DDIM',
@@ -37,7 +36,6 @@ class Inpainter:
         Args:
             model_path: Path to trained model checkpoint.
             data_name: Dataset name for prompt selection.
-            save_mode: Output saving mode ('grid' or 'individual').
             enable_aug_on_mask: Apply augmentation to masks.
             enable_aug_on_base: Apply augmentation to base images.
             scheduler_type: Noise scheduler type ('DDIM' or others).
@@ -61,7 +59,6 @@ class Inpainter:
                 f"Error: {str(e)}"
             )
         self.data_name = data_name
-        self.save_mode = save_mode
         self.enable_aug_on_mask = enable_aug_on_mask
         self.enable_aug_on_base = enable_aug_on_base
 
@@ -273,17 +270,16 @@ class Inpainter:
 
 if __name__ == "__main__":
     inpainter = Inpainter(
-        model_path=r"checkpoints\exp5_fast_with_aug_ws_2\best_model.pt",
-        data_name="exp5",
-        save_mode="individual_with_3",
+        model_path=r"checkpoints\exp1\best_model.pt",
+        data_name="exp1",
         enable_aug_on_base=True,
         enable_aug_on_mask=True,
         scheduler_type="DDIM"
     )
 
     inpainter.run(
-        base_dir=r"datasets\test\AOI\base\clean_images_20221118",
-        mask_dir=r"datasets\test\AOI\masks\draw_mask_04_dry_films(exp5)",
+        base_dir=r"datasets\test\base",
+        mask_dir=r"datasets\test\masks",
         prompt_mode=PromptMode.MULTI,
         batch_size=18,
     )
