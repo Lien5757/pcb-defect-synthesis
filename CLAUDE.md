@@ -201,12 +201,11 @@ Before finalizing any refactor:
     ```
   - [ ] Test: config file + CLI override both work
 
-- [ ] **3.4** Optimize plot saving
-  - [ ] Change: save plot every epoch → every N epochs (default 10)
-  - [ ] Add parameter: `--plot_interval 10`
-  - [ ] Benefit: faster training, reduced disk I/O
-  - [ ] Test: loss.png still captures full training curve
-
+- [x] **3.4** Optimize plot saving ✅
+  - [x] Change: save plot every epoch → every N epochs (default 10)
+  - [x] Add parameter: `--plot_interval 10`
+  - [x] Benefit: faster training, reduced disk I/O
+  - [x] Test: loss.png still captures full training curve
 
 - [ ] **3.5** Update README with refined instructions
   - [ ] Quick start: 5 min setup
@@ -341,17 +340,21 @@ After each session, update this:
 **Completed:**
 - [x] Task 3.1: Add error handling & validation
 - [x] Task 3.2: Unify logging (logger everywhere)
+- [x] Task 3.4: Optimize plot saving (configurable interval)
+
+**Changes by User:**
+- Removed Task 3.5 (Document pick_color.py) - already deleted in Phase 1.5
 
 **Issues Found:**
 - None
 
 **Next Session:**
-- Start with Task 3.3 (Config file support) or 3.4 (Plot optimization)
+- Start with Task 3.3 (Config file support) then Task 3.5 (Update README)
 
 ---
 
 **Last Updated:** 2026-06-30  
-**Status:** Phase 3.2 COMPLETE ✅ → 2/6 Phase 3 tasks done  
+**Status:** Phase 3.4 COMPLETE ✅ → 3/5 Phase 3 tasks done (3.5 removed)  
 **Summary:**
 - ✅ 2.1: Augmentation consolidation → utils/augmentation.py
 - ✅ 2.2: Type hints on primary files (SD_inpainting_train/predict, loader, datasets)
