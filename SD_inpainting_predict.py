@@ -1,6 +1,7 @@
 import os
 import torch
 import numpy as np
+import logging
 from PIL import Image
 from datetime import datetime
 from typing import List, Optional
@@ -71,6 +72,33 @@ class Inpainter:
         timestamp = datetime.now().strftime("%Y%m%d_%H-%M-%S")
 
         self.save_dir = os.path.join('output', project_name, f"{model_type}_{timestamp}")
+        self.logger = self._setup_logger()
+
+    def _setup_logger(self) -> logging.Logger:
+        """Setup logger for inference process.
+
+        Returns:
+            Configured logger instance.
+        """
+        os.makedirs(self.save_dir, exist_ok=True)
+        log_path = os.path.join(self.save_dir, "inference.log")
+        logger = logging.getLogger("Inpainter")
+        logger.setLevel(logging.INFO)
+
+        formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+
+        ch = logging.StreamHandler()
+        ch.setLevel(logging.INFO)
+        ch.setFormatter(formatter)
+        logger.addHandler(ch)
+
+        if not any(isinstance(h, logging.FileHandler) for h in logger.handlers):
+            fh = logging.FileHandler(log_path)
+            fh.setLevel(logging.INFO)
+            fh.setFormatter(formatter)
+            logger.addHandler(fh)
+
+        return logger
 
     def load_images(self, base_dir: str, mask_dir: str) -> tuple[List[str], List[str]]:
         """Load base and mask images, matching them by count.
@@ -236,13 +264,12 @@ class Inpainter:
                 save_inpainted_results(base_batch, mask_batch, results, prompts, self.save_dir, idx + 1, data_name=self.data_name, save_mode=self.save_mode)
 
             except Exception as e:
-                print(f"Error processing batch {idx + 1}: {str(e)}")
+                self.logger.error(f"Error processing batch {idx + 1}: {str(e)}")
                 raise
 
             idx += 1
 
-
-        print('Inpainting process completed.')
+        self.logger.info('Inpainting process completed.')
 
 if __name__ == "__main__":
     inpainter = Inpainter(

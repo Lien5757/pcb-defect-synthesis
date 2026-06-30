@@ -1,9 +1,12 @@
 import numpy as np
+import logging
 from collections import Counter
 from typing import Tuple, List
 from torch.utils.data import DataLoader, WeightedRandomSampler
 from utils.datasets import InpaintingDataset
 from utils.augmentation import ImageOnlyTransform
+
+logger = logging.getLogger(__name__)
     
 def load_train_data(
     data_dir: str,
@@ -71,7 +74,7 @@ def compute_soft_weights(group_labels: List[int], max_clip: float = 0.05) -> Lis
         ValueError: If computed weights sum to zero.
     """
     group_counts = Counter(group_labels)
-    print("class counts:", group_counts)
+    logger.info(f"class counts: {group_counts}")
 
     weights = {cls: 1.0 / (count + 1e-6) for cls, count in group_counts.items()}
     weights = {cls: min(w, max_clip) for cls, w in weights.items()}

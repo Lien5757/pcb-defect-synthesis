@@ -1,5 +1,8 @@
 import time
 import torch
+import logging
+
+logger = logging.getLogger(__name__)
 
 @torch.no_grad()
 def predict(pipe, base_image, mask, prompt, device, num_inference_steps=50):
@@ -13,7 +16,7 @@ def predict(pipe, base_image, mask, prompt, device, num_inference_steps=50):
         num_inference_steps=num_inference_steps
     )
     end_time = time.time()
-    print(f'Prediction time: {end_time-start_time}s')
+    logger.info(f'Prediction time: {end_time-start_time}s')
 
     return result.images[0]
 
@@ -29,5 +32,5 @@ def predict_batch(pipe, base_images, masks, prompts, device, num_inference_steps
         num_inference_steps=num_inference_steps,
     )
     end_time = time.time()
-    print(f'Average prediction time: {(end_time - start_time) / len(base_images):.2f}s')
+    logger.info(f'Average prediction time: {(end_time - start_time) / len(base_images):.2f}s')
     return results.images

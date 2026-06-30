@@ -1,8 +1,11 @@
 import os
 import numpy as np
+import logging
 from PIL import Image
 from datetime import datetime
 from utils.image_utils import combine_image_grid_batch, combine_image_with_prompt
+
+logger = logging.getLogger(__name__)
 
 def save_inpainted_results(base_batch, mask_batch, result_batch, prompts, save_dir, batch_idx, data_name, save_mode='grid'):
     os.makedirs(save_dir, exist_ok=True)
@@ -14,26 +17,26 @@ def save_inpainted_results(base_batch, mask_batch, result_batch, prompts, save_d
             [img.resize((256, 256)) for img in result_batch],
         ])
         combined.save(os.path.join(save_dir, f"batch_{batch_idx}.png"))
-        print(f"Saved: batch_{batch_idx}.png")
+        logger.info(f"Saved: batch_{batch_idx}.png")
 
     elif save_mode == 'individual':  # individual save mode
         for k, img in enumerate(result_batch):
             img_np = np.array(img)
             if np.max(img_np) == 0:
-                print(f"Warning: Inpainted image {k} is completely black!")
+                logger.warning(f"Inpainted image {k} is completely black")
                 continue
             
             timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
             save_path = setting_save_path(data_name, prompt, timestamp, batch_idx, k, save_dir)
 
             img.save(save_path)
-            print(f'Saved: {save_path}')
+            logger.info(f'Saved: {save_path}')
     
     elif save_mode == 'individual_with_3':
         for k, img in enumerate(result_batch):
             img_np = np.array(img)
             if np.max(img_np) == 0:
-                print(f"Warning: Inpainted image {k} is completely black!")
+                logger.warning(f"Inpainted image {k} is completely black")
                 continue
 
             prompt = prompts[k]
@@ -41,7 +44,7 @@ def save_inpainted_results(base_batch, mask_batch, result_batch, prompts, save_d
             # single image
             save_path, filename = setting_save_path(data_name, prompt, timestamp, batch_idx, k, save_dir)
             img.save(save_path)
-            print(f'Inpainted result saved: {save_path}')
+            logger.info(f'Inpainted result saved: {save_path}')
 
             # combined image
             combined_dir = os.path.join(save_dir, 'combine_grid')
@@ -50,7 +53,7 @@ def save_inpainted_results(base_batch, mask_batch, result_batch, prompts, save_d
             combined = combine_image_with_prompt(base_batch[k], mask_batch[k], img, prompt)
             save_grid_path = os.path.join(combined_dir, filename)
             combined.save(save_grid_path)
-            print(f'Paired image saved: {save_grid_path}')
+            logger.info(f'Paired image saved: {save_grid_path}')
 
         # Batch grid
         combined = combine_image_grid_batch([
@@ -63,13 +66,13 @@ def save_inpainted_results(base_batch, mask_batch, result_batch, prompts, save_d
         os.makedirs(grid_dir, exist_ok=True)
 
         combined.save(os.path.join(grid_dir, f"batch_{batch_idx}.png"))
-        print(f"Saved: batch_{batch_idx}.png")
+        logger.info(f"Saved: batch_{batch_idx}.png")
     
     elif save_mode == 'individual_with_4': # + Mask
         for k, img in enumerate(result_batch):
             img_np = np.array(img)
             if np.max(img_np) == 0:
-                print(f"Warning: Inpainted image {k} is completely black!")
+                logger.warning(f"Inpainted image {k} is completely black")
                 continue
 
             prompt = prompts[k]
@@ -77,7 +80,7 @@ def save_inpainted_results(base_batch, mask_batch, result_batch, prompts, save_d
             # single image
             save_path, filename = setting_save_path(data_name, prompt, timestamp, batch_idx, k, save_dir)
             img.save(save_path)
-            print(f'Saved: {save_path}')
+            logger.info(f'Saved: {save_path}')
 
             # combined image
             combined_dir = os.path.join(save_dir, 'combine_grid')
@@ -86,7 +89,7 @@ def save_inpainted_results(base_batch, mask_batch, result_batch, prompts, save_d
             combined = combine_image_with_prompt(base_batch[k], mask_batch[k], img, prompt)
             save_grid_path = os.path.join(combined_dir, filename)
             combined.save(save_grid_path)
-            print(f'Saved: {save_grid_path}')
+            logger.info(f'Saved: {save_grid_path}')
 
             # mask image
             mask_dir = os.path.join(save_dir, 'masks')
@@ -106,7 +109,7 @@ def save_inpainted_results(base_batch, mask_batch, result_batch, prompts, save_d
         os.makedirs(grid_dir, exist_ok=True)
 
         combined.save(os.path.join(grid_dir, f"batch_{batch_idx}.png"))
-        print(f"Saved: batch_{batch_idx}.png")
+        logger.info(f"Saved: batch_{batch_idx}.png")
 
 def setting_save_path(data_name, prompt, timestamp, batch_idx, k, save_dir):
     if data_name == 'exp5' or 'exp5_v2' or'exp3':

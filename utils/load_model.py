@@ -1,6 +1,9 @@
 import torch
+import logging
 from diffusers import (StableDiffusionInpaintPipeline, DDIMScheduler, EulerAncestralDiscreteScheduler,
                         LMSDiscreteScheduler, PNDMScheduler, DPMSolverMultistepScheduler)
+
+logger = logging.getLogger(__name__)
 
 def load_model(checkpoint_path, device='cuda', scheduler_type="DDIM"):
     pipe = StableDiffusionInpaintPipeline.from_pretrained("runwayml/stable-diffusion-inpainting").to(device)
@@ -18,5 +21,5 @@ def load_model(checkpoint_path, device='cuda', scheduler_type="DDIM"):
         raise ValueError(f"Unsupported scheduler type: {scheduler_type}")
     checkpoint = torch.load(checkpoint_path, map_location=device, weights_only=True)
     pipe.unet.load_state_dict(checkpoint["unet"] if "unet" in checkpoint else checkpoint)
-    print(f"Load model: {checkpoint_path}")
+    logger.info(f"Load model: {checkpoint_path}")
     return pipe
