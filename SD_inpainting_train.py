@@ -315,17 +315,25 @@ def parse_args() -> argparse.Namespace:
 if __name__ == "__main__":
     args = parse_args()
 
-    # Load config from file if provided
-    if args.config:
-        config = TrainingConfig.from_json(args.config)
-    else:
-        # Use default config
-        config = TrainingConfig(data_dir=r'datasets\train\exp1')
+    try:
+        # Load config from file if provided
+        if args.config:
+            config = TrainingConfig.from_json(args.config)
+        else:
+            # Use default config
+            config = TrainingConfig(data_dir=r'datasets\train\exp1')
 
-    # Override with CLI args
-    cli_args = {k: v for k, v in vars(args).items() if v is not None and k != 'config'}
-    if cli_args:
-        config.update_from_args(**cli_args)
+        # Override with CLI args
+        cli_args = {k: v for k, v in vars(args).items() if v is not None and k != 'config'}
+        if cli_args:
+            config.update_from_args(**cli_args)
 
-    trainer = StableDiffusionInpainterTrainer(config)
-    trainer.train()
+        trainer = StableDiffusionInpainterTrainer(config)
+        trainer.train()
+
+    except (FileNotFoundError, ValueError, TypeError, IOError) as e:
+        print(f"Configuration Error: {str(e)}", flush=True)
+        exit(1)
+    except Exception as e:
+        print(f"Unexpected error: {str(e)}", flush=True)
+        exit(1)

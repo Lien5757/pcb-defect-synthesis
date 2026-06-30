@@ -10,5 +10,6 @@
   "warmup_ratio": 0.05,
   "use_weighted_sampler": false,
   "min_delta": 0.0001,
-  "save_interval": 200
+  "save_interval": 200,
+  "plot_interval": 10
 }

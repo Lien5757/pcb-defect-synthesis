@@ -1,6 +1,9 @@
 import json
 import os
+import logging
 from dataclasses import dataclass, asdict
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -22,14 +25,57 @@ class TrainingConfig:
 
     @staticmethod
     def from_json(config_path: str) -> "TrainingConfig":
-        """Load config from JSON file."""
+        """Load config from JSON file with validation.
+
+        Args:
+            config_path: Path to JSON configuration file.
+
+        Returns:
+            TrainingConfig instance.
+
+        Raises:
+            FileNotFoundError: If config file does not exist.
+            json.JSONDecodeError: If config file is not valid JSON.
+            ValueError: If required parameters are missing.
+            TypeError: If parameter types are invalid.
+        """
         if not os.path.exists(config_path):
-            raise FileNotFoundError(f"Config file not found: {config_path}")
+            raise FileNotFoundError(
+                f"Config file not found: {config_path}\n"
+                f"Please ensure the file exists at the specified path."
+            )
 
-        with open(config_path, 'r') as f:
-            config_dict = json.load(f)
+        try:
+            with open(config_path, 'r') as f:
+                config_dict = json.load(f)
+        except json.JSONDecodeError as e:
+            raise json.JSONDecodeError(
+                f"Config file is not valid JSON: {config_path}\n"
+                f"Error: {str(e)}",
+                e.doc,
+                e.pos
+            )
+        except IOError as e:
+            raise IOError(f"Cannot read config file: {config_path}\nError: {str(e)}")
 
-        return TrainingConfig(**config_dict)
+        # Validate required parameters
+        if 'data_dir' not in config_dict:
+            raise ValueError(
+                f"Config file must contain 'data_dir' parameter.\n"
+                f"Config file: {config_path}\n"
+                f"Current keys: {list(config_dict.keys())}"
+            )
+
+        try:
+            config = TrainingConfig(**config_dict)
+        except TypeError as e:
+            raise TypeError(
+                f"Invalid parameters in config file: {config_path}\n"
+                f"Error: {str(e)}"
+            )
+
+        logger.info(f"Config loaded from: {config_path}")
+        return config
 
     def to_json(self, output_path: str) -> None:
         """Save config to JSON file."""
