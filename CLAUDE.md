@@ -172,11 +172,13 @@ Before finalizing any refactor:
 **Prerequisite:** Complete Phase 1-2  
 **Exit Criteria:** Ready for `git push` to public repo
 
-- [ ] **3.1** Add error handling & validation
-  - [ ] Check data paths exist before training
-  - [ ] Validate model checkpoint format
-  - [ ] Handle edge cases: empty dataset, missing mask, etc.
-  - [ ] Raise meaningful errors, not generic crashes
+- [x] **3.1** Add error handling & validation ✅
+  - [x] Check data paths exist before training
+  - [x] Validate model checkpoint format
+  - [x] Handle edge cases: empty dataset, missing mask, etc.
+  - [x] Raise meaningful errors, not generic crashes
+  - [x] Created utils/validation.py with comprehensive checks
+  - [x] Enhanced train/predict with validation in critical paths
 
 - [ ] **3.2** Unify logging (use logger everywhere)
   - [ ] Train: `logger.info()` ✓ (already done)
@@ -336,8 +338,23 @@ After each session, update this:
 
 ---
 
-**Last Updated:** 2026-06-29  
-**Status:** Phase 2 COMPLETE (100%) ✅ → Ready for Phase 3  
+---
+
+### Session 2026-06-30
+**Phase:** 3 (Polish/Development Experience)  
+**Completed:**
+- [x] Task 3.1: Add error handling & validation
+
+**Issues Found:**
+- None
+
+**Next Session:**
+- Start with Task 3.2 (Unify logging)
+
+---
+
+**Last Updated:** 2026-06-30  
+**Status:** Phase 3.1 COMPLETE ✅ → Working on Phase 3  
 **Summary:**
 - ✅ 2.1: Augmentation consolidation → utils/augmentation.py
 - ✅ 2.2: Type hints on primary files (SD_inpainting_train/predict, loader, datasets)
