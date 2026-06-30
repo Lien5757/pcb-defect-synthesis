@@ -14,6 +14,7 @@ from utils.prompt_utils import set_prompts, set_prompts_given
 from utils.load_model import load_model
 from utils.predict import predict_batch
 from utils.save_results import save_inpainted_results
+from utils.validation import validate_model_path, validate_prediction_dirs, ValidationError
 from config.enums import PromptMode
 
 
@@ -40,9 +41,24 @@ class Inpainter:
             enable_aug_on_base: Apply augmentation to base images.
             scheduler_type: Noise scheduler type ('DDIM' or others).
             device: Device to use ('cuda:0' or 'cpu'). Auto-detected if None.
+
+        Raises:
+            ValidationError: If model path is invalid.
         """
+        # Validate model path before loading
+        try:
+            validate_model_path(model_path)
+        except ValidationError as e:
+            raise ValidationError(f"Model validation failed:\n{str(e)}")
+
         self.device = device or ("cuda:0" if torch.cuda.is_available() else "cpu")
-        self.pipe = load_model(model_path, device=self.device, scheduler_type=scheduler_type)
+        try:
+            self.pipe = load_model(model_path, device=self.device, scheduler_type=scheduler_type)
+        except Exception as e:
+            raise RuntimeError(
+                f"Failed to load model from {model_path}\n"
+                f"Error: {str(e)}"
+            )
         self.data_name = data_name
         self.save_mode = save_mode
         self.enable_aug_on_mask = enable_aug_on_mask
@@ -65,10 +81,30 @@ class Inpainter:
 
         Returns:
             Tuple of (base_image_paths, mask_image_paths) with matched lengths.
+
+        Raises:
+            ValueError: If no images found in either directory.
         """
         supported_extensions = ('.png', '.jpg', '.jpeg', '.bmp')
-        base_images = [os.path.join(base_dir, f) for f in os.listdir(base_dir) if f.endswith(supported_extensions)]
-        mask_images = [os.path.join(mask_dir, f) for f in os.listdir(mask_dir) if f.endswith(supported_extensions)]
+        try:
+            base_images = [os.path.join(base_dir, f) for f in os.listdir(base_dir)
+                          if f.lower().endswith(supported_extensions)]
+            mask_images = [os.path.join(mask_dir, f) for f in os.listdir(mask_dir)
+                          if f.lower().endswith(supported_extensions)]
+        except OSError as e:
+            raise ValueError(f"Error reading image directories: {str(e)}")
+
+        if not base_images:
+            raise ValueError(
+                f"No base images found in: {base_dir}\n"
+                f"Supported formats: {supported_extensions}"
+            )
+
+        if not mask_images:
+            raise ValueError(
+                f"No mask images found in: {mask_dir}\n"
+                f"Supported formats: {supported_extensions}"
+            )
 
         if len(mask_images) > len(base_images):
             match_mask_images = random.sample(mask_images, len(base_images))
@@ -88,10 +124,22 @@ class Inpainter:
 
         Returns:
             Binarized PIL Image.
+
+        Raises:
+            ValueError: If mask cannot be loaded or is invalid.
         """
-        mask = cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE)
-        _, mask = cv2.threshold(mask, 0, 255, cv2.THRESH_BINARY)
-        return Image.fromarray(mask)
+        try:
+            mask = cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE)
+            if mask is None:
+                raise ValueError(f"Failed to read mask image (cv2.imread returned None)")
+        except Exception as e:
+            raise ValueError(f"Cannot read mask image from {mask_path}: {str(e)}")
+
+        try:
+            _, mask = cv2.threshold(mask, 0, 255, cv2.THRESH_BINARY)
+            return Image.fromarray(mask)
+        except Exception as e:
+            raise ValueError(f"Cannot process mask image: {str(e)}")
 
     def run(
         self,
@@ -111,9 +159,26 @@ class Inpainter:
             prompt: Custom prompt text (required if prompt_mode=PromptMode.SINGLE).
             batch_size: Number of images per batch.
             target_total: Total images to generate (replicates if needed).
+
+        Raises:
+            ValidationError: If input directories are invalid.
+            ValueError: If prompt_mode is SINGLE but prompt is not provided.
         """
         if isinstance(prompt_mode, str):
             prompt_mode = PromptMode(prompt_mode)
+
+        # Validate input directories
+        try:
+            validate_prediction_dirs(base_dir, mask_dir)
+        except ValidationError as e:
+            raise ValidationError(f"Input directory validation failed:\n{str(e)}")
+
+        # Validate prompt configuration
+        if prompt_mode == PromptMode.SINGLE and not prompt:
+            raise ValueError(
+                "prompt_mode is PromptMode.SINGLE but prompt parameter is not provided.\n"
+                "Please provide a custom prompt text."
+            )
 
         os.makedirs(self.save_dir, exist_ok=True)
 
@@ -136,24 +201,44 @@ class Inpainter:
             base_batch_paths = base_images[i:i+batch_size]
             mask_batch_paths = match_mask_images[i:i+batch_size]
 
-            base_batch = [Image.open(p).convert("RGB") for p in base_batch_paths]
-            if self.enable_aug_on_base:
-                base_batch = [random_flip_rotate_pil(img) for img in base_batch]
+            try:
+                # Load base images
+                base_batch = []
+                for p in base_batch_paths:
+                    try:
+                        base_batch.append(Image.open(p).convert("RGB"))
+                    except Exception as e:
+                        raise ValueError(f"Cannot load base image from {p}: {str(e)}")
 
-            mask_batch = [self.process_mask(p) for p in mask_batch_paths]
-            if self.enable_aug_on_mask:
-                mask_batch = [
-                    Image.fromarray(random_transform(np.array(p)))
-                    for p in mask_batch
-                ]
+                if self.enable_aug_on_base:
+                    base_batch = [random_flip_rotate_pil(img) for img in base_batch]
 
-            if prompt_mode == PromptMode.MULTI:
-                prompts = set_prompts(batch_size=len(base_batch), data=self.data_name)
-            elif prompt_mode == PromptMode.SINGLE:
-                prompts = set_prompts_given(batch_size=len(base_batch), prompt=prompt)
-            results = predict_batch(self.pipe, base_batch, mask_batch, prompts, self.device)
+                # Load and process masks
+                mask_batch = []
+                for p in mask_batch_paths:
+                    try:
+                        mask_batch.append(self.process_mask(p))
+                    except ValueError as e:
+                        raise ValueError(f"Error processing mask {p}: {str(e)}")
 
-            save_inpainted_results(base_batch, mask_batch, results, prompts, self.save_dir, idx + 1, data_name=self.data_name, save_mode=self.save_mode)
+                if self.enable_aug_on_mask:
+                    mask_batch = [
+                        Image.fromarray(random_transform(np.array(p)))
+                        for p in mask_batch
+                    ]
+
+                if prompt_mode == PromptMode.MULTI:
+                    prompts = set_prompts(batch_size=len(base_batch), data=self.data_name)
+                elif prompt_mode == PromptMode.SINGLE:
+                    prompts = set_prompts_given(batch_size=len(base_batch), prompt=prompt)
+
+                results = predict_batch(self.pipe, base_batch, mask_batch, prompts, self.device)
+                save_inpainted_results(base_batch, mask_batch, results, prompts, self.save_dir, idx + 1, data_name=self.data_name, save_mode=self.save_mode)
+
+            except Exception as e:
+                print(f"Error processing batch {idx + 1}: {str(e)}")
+                raise
+
             idx += 1
 
 

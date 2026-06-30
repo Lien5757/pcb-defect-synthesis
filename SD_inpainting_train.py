@@ -12,6 +12,7 @@ from transformers import get_linear_schedule_with_warmup
 # Import utils
 from utils.plot_utils import show_batch_images_and_masks, plot_loss_live, plot_lr
 from utils.loader import load_train_data
+from utils.validation import validate_training_config, validate_batch_size, ValidationError
 from config import TrainingConfig
 
 class StableDiffusionInpainterTrainer:
@@ -91,17 +92,45 @@ class StableDiffusionInpainterTrainer:
 
         Args:
             path: Path to checkpoint file.
+
+        Raises:
+            RuntimeError: If checkpoint format is invalid or corrupted.
         """
         if not os.path.exists(path):
             self.logger.info(f"No checkpoint found at {path}. Starting fresh.")
             return
 
-        checkpoint = torch.load(path, map_location=self.device)
-        self.pipe.unet.load_state_dict(checkpoint["model_state_dict"])
-        self.optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
-        self.scaler.load_state_dict(checkpoint["scaler_state_dict"])
-        self.start_epoch = checkpoint["epoch"] + 1
-        self.best_loss = checkpoint.get("best_loss", self.best_loss)
+        try:
+            checkpoint = torch.load(path, map_location=self.device)
+        except Exception as e:
+            raise RuntimeError(
+                f"Failed to load checkpoint from {path}\n"
+                f"Error: {str(e)}\n"
+                f"The checkpoint may be corrupted or in an invalid format."
+            )
+
+        # Validate required keys
+        required_keys = ["model_state_dict", "optimizer_state_dict", "scaler_state_dict"]
+        missing_keys = [k for k in required_keys if k not in checkpoint]
+        if missing_keys:
+            raise RuntimeError(
+                f"Checkpoint is missing required keys: {missing_keys}\n"
+                f"Valid checkpoint should contain: {required_keys}"
+            )
+
+        try:
+            self.pipe.unet.load_state_dict(checkpoint["model_state_dict"])
+            self.optimizer.load_state_dict(checkpoint["optimizer_state_dict"])
+            self.scaler.load_state_dict(checkpoint["scaler_state_dict"])
+            self.start_epoch = checkpoint["epoch"] + 1
+            self.best_loss = checkpoint.get("best_loss", self.best_loss)
+        except RuntimeError as e:
+            raise RuntimeError(
+                f"Failed to load checkpoint state into model\n"
+                f"Error: {str(e)}\n"
+                f"Checkpoint may be incompatible with current model architecture."
+            )
+
         self.logger.info(f"Resumed training from epoch {self.start_epoch}")
 
     def _save_checkpoint(self, epoch: int) -> None:
@@ -143,6 +172,14 @@ class StableDiffusionInpainterTrainer:
     def train(self) -> None:
         """Execute full training loop with loss tracking and checkpointing."""
         self.logger.info("Starting training...")
+
+        # Validate training configuration
+        try:
+            validate_training_config(self.data_dir)
+        except ValidationError as e:
+            self.logger.error(f"Configuration validation failed:\n{str(e)}")
+            raise
+
         self.logger.info(f"Data Dir: {self.data_dir}")
         self.logger.info(f"Project: {self.project_name}")
         self.logger.info(f"Num Epochs: {self.num_epochs}")
@@ -152,6 +189,13 @@ class StableDiffusionInpainterTrainer:
         self.logger.info(f"Use Weighted Sampler: {self.use_weighted_sampler}")
 
         dataset, dataloader, sample_weights = load_train_data(self.data_dir, self.batch_size, self.is_transform, self.use_weighted_sampler)
+
+        # Validate dataset
+        try:
+            validate_batch_size(self.batch_size, len(dataset))
+        except ValidationError as e:
+            self.logger.error(f"Dataset validation failed:\n{str(e)}")
+            raise
         self.logger.info(f"Sample weights:{sample_weights}")
 
         # Warmup setup

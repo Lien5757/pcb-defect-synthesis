@@ -21,12 +21,32 @@ def load_train_data(
 
     Returns:
         Tuple of (dataset, dataloader, sample_weights).
+
+    Raises:
+        ValueError: If dataset is empty or invalid.
     """
     if isTransform:
         transform = ImageOnlyTransform(crop_size=(448, 448), flip_prob=0.5)
     else:
         transform = None
-    dataset = InpaintingDataset(base_dir=data_dir, transform=transform)
+
+    try:
+        dataset = InpaintingDataset(base_dir=data_dir, transform=transform)
+    except Exception as e:
+        raise ValueError(
+            f"Failed to load dataset from {data_dir}\n"
+            f"Error: {str(e)}\n"
+            f"Expected directory structure:\n"
+            f"  {data_dir}/images/{{class}}/{{image}}.png\n"
+            f"  {data_dir}/masks/{{class}}/{{image}}.png\n"
+            f"  {data_dir}/texts/{{class}}/{{image}}.txt"
+        )
+
+    if len(dataset) == 0:
+        raise ValueError(
+            f"Dataset is empty after loading from {data_dir}\n"
+            f"Ensure images, masks, and text files are properly aligned."
+        )
 
     if use_weighted_sampler:
         sample_weights = compute_soft_weights(dataset.class_labels, max_clip=0.05)
