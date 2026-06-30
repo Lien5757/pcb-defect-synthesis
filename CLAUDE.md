@@ -186,20 +186,11 @@ Before finalizing any refactor:
   - [x] Format: `[%(asctime)s] %(levelname)s: %(message)s`
   - [ ] Data prep: add logging for progress (deferred, non-critical path)
 
-- [ ] **3.3** Support config file (JSON/YAML)
-  - [ ] Accept: `python SD_inpainting_train.py --config path/to/config.json`
-  - [ ] Format example:
-    ```json
-    {
-      "data_dir": "./data",
-      "project_name": "exp1",
-      "num_epochs": 500,
-      "batch_size": 1,
-      "lr": 5e-7,
-      "use_weighted_sampler": true
-    }
-    ```
-  - [ ] Test: config file + CLI override both work
+- [x] **3.3** Support config file (JSON/YAML) ✅
+  - [x] Accept: `python SD_inpainting_train.py --config path/to/config.json`
+  - [x] Enhanced error handling and validation
+  - [x] Create docs/config.md with full guide
+  - [x] Test: config file + CLI override both work
 
 - [x] **3.4** Optimize plot saving ✅
   - [x] Change: save plot every epoch → every N epochs (default 10)
@@ -341,6 +332,7 @@ After each session, update this:
 - [x] Task 3.1: Add error handling & validation
 - [x] Task 3.2: Unify logging (logger everywhere)
 - [x] Task 3.4: Optimize plot saving (configurable interval)
+- [x] Task 3.3: Config file support with validation
 
 **Changes by User:**
 - Removed Task 3.5 (Document pick_color.py) - already deleted in Phase 1.5
@@ -349,12 +341,12 @@ After each session, update this:
 - None
 
 **Next Session:**
-- Start with Task 3.3 (Config file support) then Task 3.5 (Update README)
+- Start with Task 3.5 (Update README)
 
 ---
 
 **Last Updated:** 2026-06-30  
-**Status:** Phase 3.4 COMPLETE ✅ → 3/5 Phase 3 tasks done (3.5 removed)  
+**Status:** Phase 3.3 COMPLETE ✅ → 4/5 Phase 3 tasks done (3.5 removed)  
 **Summary:**
 - ✅ 2.1: Augmentation consolidation → utils/augmentation.py
 - ✅ 2.2: Type hints on primary files (SD_inpainting_train/predict, loader, datasets)
