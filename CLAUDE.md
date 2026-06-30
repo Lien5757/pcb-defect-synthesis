@@ -207,12 +207,8 @@ Before finalizing any refactor:
   - [ ] Benefit: faster training, reduced disk I/O
   - [ ] Test: loss.png still captures full training curve
 
-- [ ] **3.5** Document or remove `pick_color.py`
-  - [ ] If keeping: move to `utils/` + add to main pipeline
-  - [ ] If removing: delete file + update docs
-  - [ ] Same for `evaluate_SSIM.py`
 
-- [ ] **3.6** Update README with refined instructions
+- [ ] **3.5** Update README with refined instructions
   - [ ] Quick start: 5 min setup
   - [ ] Config examples: different hardware/dataset sizes
   - [ ] Troubleshooting: common errors

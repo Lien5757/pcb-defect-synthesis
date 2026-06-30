@@ -39,6 +39,7 @@ class StableDiffusionInpainterTrainer:
         self.warmup_ratio = config.warmup_ratio
         self.use_weighted_sampler = config.use_weighted_sampler
         self.save_interval = config.save_interval
+        self.plot_interval = config.plot_interval
 
         self.save_dir = os.path.join('checkpoints', self.project_name)
         os.makedirs(self.save_dir, exist_ok=True)
@@ -187,6 +188,7 @@ class StableDiffusionInpainterTrainer:
         self.logger.info(f"Learning Rate: {self.lr} Weight Decay: {self.weight_decay}")
         self.logger.info(f"Use Warmup: {self.use_warmup} Warmup Ratio: {self.warmup_ratio}")
         self.logger.info(f"Use Weighted Sampler: {self.use_weighted_sampler}")
+        self.logger.info(f"Plot Interval: {self.plot_interval} epochs")
 
         dataset, dataloader, sample_weights = load_train_data(self.data_dir, self.batch_size, self.is_transform, self.use_weighted_sampler)
 
@@ -280,7 +282,7 @@ class StableDiffusionInpainterTrainer:
                 self.no_improve_epochs += 1
                 self.logger.info(f"No improvement for {self.no_improve_epochs} epoch(s)")
 
-            plot_loss_live(epoch, self.loss_history, plot_interval=1, save_dir=self.save_dir)
+            plot_loss_live(epoch, self.loss_history, plot_interval=self.plot_interval, save_dir=self.save_dir)
 
         torch.save(self.pipe.unet.state_dict(), os.path.join(self.save_dir, "final_model.pt"))
         plot_lr(self.lr_history, self.save_dir)
@@ -306,6 +308,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--use_weighted_sampler", action="store_true", help="Enable weighted sampler")
     parser.add_argument("--min_delta", type=float, default=None, help="Min delta for loss tracking")
     parser.add_argument("--save_interval", type=int, default=None, help="Checkpoint save interval")
+    parser.add_argument("--plot_interval", type=int, default=None, help="Plot save interval (epochs)")
     return parser.parse_args()
 
 

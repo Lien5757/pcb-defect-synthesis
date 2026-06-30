@@ -18,6 +18,7 @@ class TrainingConfig:
     use_weighted_sampler: bool = True
     min_delta: float = 1e-4
     save_interval: int = 200
+    plot_interval: int = 10
 
     @staticmethod
     def from_json(config_path: str) -> "TrainingConfig":
