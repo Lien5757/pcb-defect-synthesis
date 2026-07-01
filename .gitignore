@@ -1,0 +1,50 @@
+# Data & Models (too large for public repo)
+/data/
+/datasets/
+/checkpoints/
+/output/
+
+# Large model files
+*.pt
+*.pth
+*.bin
+*.ckpt
+
+# Project documentation (internal use only)
+CLAUDE.md
+CODEBASE_AUDIT.md
+Thesis.md
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+.Python
+venv/
+env/
+ENV/
+build/
+develop-eggs/
+dist/
+
+# IDE & Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Environment variables
+.env
+.env.local
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb
+
+# Logs
+*.log
