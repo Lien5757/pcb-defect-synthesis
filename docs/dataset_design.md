@@ -6,7 +6,7 @@ Best practices for structuring defect classes and avoiding common pitfalls.
 
 ## ✓ Best Practices
 
-### Split Classes by Visual Characteristics
+### 1. Split Classes by Visual Characteristics
 
 Separate defects by **color** and **shape** to ensure clear, distinct classes:
 
@@ -27,7 +27,7 @@ Poor Class Design (avoid):
 - Separate by shape: "A large area scratch" vs. "A thin line scratch"
 - Each class should have **visually consistent** samples
 
-### Use Specific, Descriptive Prompts
+### 2. Use Specific, Descriptive Prompts
 
 Semantic clarity directly affects generation quality:
 
@@ -39,13 +39,13 @@ Semantic clarity directly affects generation quality:
 | "Defect" | ✗ Poor | Too generic, unstable generation |
 | "Blue and scratchy thing" | ✗ Poor | Compound concepts confuse model |
 
-### Aim for Balanced, Sufficient Sample Counts
+### 3. Aim for Balanced, Sufficient Sample Counts
 
 - **Target:** 50+ samples per class
 - **Minimum:** 20 samples per class for stable generation
 - **Distribution:** Roughly equal across classes (use weighted sampling if imbalanced)
 
-### Use Natural, Rough Masks
+### 4. Use Natural, Rough Masks
 
 Masks do not need to be perfectly traced. **Hand-drawn masks are superior to pixel-perfect tracing** because they teach the model how defects naturally transition at edges.
 

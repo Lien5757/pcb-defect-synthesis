@@ -35,7 +35,7 @@ def resize_images(src_dir, dst_dir, size=(512, 512)):
         dst_img_dir = os.path.join(dst_dir, 'images', class_name)
         os.makedirs(dst_img_dir, exist_ok=True)
 
-        fileList = os.listdir(os.path.join(dst_dir, class_name))
+        fileList = os.listdir(os.path.join(src_dir, class_name))
         for file_name in fileList:
             image_path = os.path.join(src_dir, class_name, file_name)
 
