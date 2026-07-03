@@ -1,4 +1,5 @@
 import os
+import json
 import time
 import logging
 import argparse
@@ -28,7 +29,8 @@ class StableDiffusionInpainterTrainer:
 
         self.config = config
         self.data_dir = config.data_dir
-        self.project_name = f"{config.project_name}_{today_str}"
+        run_id = config.generate_run_id()
+        self.project_name = f"{run_id}_{today_str}"
         self.is_transform = config.is_transform
         self.num_epochs = config.num_epochs
         self.batch_size = config.batch_size
@@ -43,6 +45,9 @@ class StableDiffusionInpainterTrainer:
 
         self.save_dir = os.path.join('checkpoints', self.project_name)
         os.makedirs(self.save_dir, exist_ok=True)
+
+        # Save config for reproducibility
+        config.to_json(os.path.join(self.save_dir, "config.json"))
 
         self.resume_path = os.path.join(self.save_dir, "latest.pt")
 
@@ -148,6 +153,32 @@ class StableDiffusionInpainterTrainer:
             "best_loss": self.best_loss
         }
         torch.save(checkpoint, os.path.join(self.save_dir, "latest.pt"))
+
+    def _save_metadata(self, final_epoch: int) -> None:
+        """Save training metadata to JSON file.
+
+        Args:
+            final_epoch: Final epoch number after training completes.
+        """
+        metadata = {
+            "project_name": self.config.project_name,
+            "run_id": self.config.generate_run_id(),
+            "trained_at": datetime.now().isoformat(),
+            "best_loss": float(self.best_loss),
+            "final_epoch": final_epoch,
+            "config": {
+                "data_dir": self.config.data_dir,
+                "num_epochs": self.config.num_epochs,
+                "batch_size": self.config.batch_size,
+                "lr": self.config.lr,
+                "use_weighted_sampler": self.config.use_weighted_sampler,
+                "is_transform": self.config.is_transform,
+            }
+        }
+        metadata_path = os.path.join(self.save_dir, "metadata.json")
+        with open(metadata_path, 'w') as f:
+            json.dump(metadata, f, indent=2)
+        self.logger.info(f"Metadata saved to {metadata_path}")
 
     def _setup_logger(self) -> logging.Logger:
         """Setup logger with both console and file handlers."""
@@ -286,6 +317,7 @@ class StableDiffusionInpainterTrainer:
 
         torch.save(self.pipe.unet.state_dict(), os.path.join(self.save_dir, "final_model.pt"))
         plot_lr(self.lr_history, self.save_dir)
+        self._save_metadata(epoch)
         self.logger.info("Training Complete.")
 
 def parse_args() -> argparse.Namespace:

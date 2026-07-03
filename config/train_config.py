@@ -93,3 +93,33 @@ class TrainingConfig:
         for key, value in kwargs.items():
             if value is not None and hasattr(self, key):
                 setattr(self, key, value)
+
+    def generate_run_id(self) -> str:
+        """Generate compact run ID based on non-default parameters.
+
+        Returns a string like 'exp1_base' or 'exp1_transform_lr5e7_ws'
+        indicating which parameters differ from defaults.
+
+        Returns:
+            Compact run ID string for this configuration.
+        """
+        parts = [self.project_name]
+
+        # Track non-default parameters
+        modified = []
+
+        if self.is_transform:
+            modified.append("transform")
+        if self.num_epochs != 500:
+            modified.append(f"ep{self.num_epochs}")
+        if not self.use_warmup:
+            modified.append("nowp")
+        if not self.use_weighted_sampler:
+            modified.append("nows")
+
+        if modified:
+            parts.extend(modified)
+        else:
+            parts.append("base")
+
+        return "_".join(parts)

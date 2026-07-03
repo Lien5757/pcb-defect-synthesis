@@ -1,4 +1,4 @@
-# Data Annotation Guide
+# Data Preparation Guide
 
 Detailed instructions for preparing images, masks, and prompts.
 
@@ -75,29 +75,26 @@ python data_preprocess/pre_mask_utils.py
 
 ## Step 3: Generate Prompts
 
-Create semantic descriptions for each defect class.
+Create semantic descriptions for each defect class from centralized configuration.
 
-**File:** `data_preprocess/pre_prompt_utils.py`
+**File:** `data_preprocess/pre_prompt_utils.py`  
+**Config:** `config/prompts.json` (defines all prompts by dataset name)
 
 **Setup:**
 ```python
-# Edit CLASS_TO_PROMPT at top of file
-CLASS_TO_PROMPT = {
-    "0_dark_blue": "A dark blue dry film residual defect",
-    "1_light_blue": "A light blue dry film residual defect",
-    "2_scratch": "A scratch defect on tray",
-    # ... add your classes
-}
-
 if __name__ == "__main__":
     data_dir = r'your/dataset/path'
-    save_prompts(data_dir, CLASS_TO_PROMPT)
+    data_name = 'exp1'  # or 'exp2', 'exp3', 'exp4', 'exp5', 'exp5_v2', 'exp6'
+    save_prompts(data_dir, data_name=data_name)
 ```
+
+The script automatically loads prompts for your `data_name` from `config/prompts.json`.
 
 **Run:**
 ```bash
 python data_preprocess/pre_prompt_utils.py
 ```
+
 
 **Prompt Guidelines:**
 - **Specific** — "A dark blue dry film defect" not "A blue defect"
@@ -105,17 +102,6 @@ python data_preprocess/pre_prompt_utils.py
 - **Consistent** — Use similar structure across related classes
 - **Concrete** — Avoid vague or compound concepts
 
-**Examples:**
-```
-✓ "A dark blue dry film residual defect"
-✓ "A light blue dry film residual defect"
-✓ "A large scratch covering wide area on PCB"
-✓ "A thin single-line scratch on PCB surface"
-
-✗ "A defect"
-✗ "Blue thing"
-✗ "Scratch and blue combined"
-```
 
 **Output:** `texts/<class>/` with one prompt per image file
 
