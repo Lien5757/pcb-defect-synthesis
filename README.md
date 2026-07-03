@@ -1,4 +1,4 @@
-# PCB Defect Synthesis via Stable Diffusion Inpainting
+# 🔬 PCB Defect Synthesis via Stable Diffusion Inpainting
 
 Fine-tuned Stable Diffusion Inpainting for industrial PCB defect data augmentation —  
 generating realistic, localized defects from clean images, binary masks, and text prompts,  
@@ -9,18 +9,18 @@ validated on a 15-class EfficientNet-B0 classifier.
 
 ---
 
-## Highlights
+## ✨ Highlights
 
-- **Stable Diffusion Inpainting fine-tuned with LoRA** on real PCB defect samples
-- Controlled synthesis via **clean image + defect mask + text prompt**
-- Outperforms GauGAN baseline by ~4% recall at 2x augmentation
-- Mask precision and prompt clarity are the dominant factors governing generation quality
-- Explored **Weighted Sampling** and **AMP** for low-data industrial training scenarios
-- Validated on **15 defect classes** using EfficientNet-B0
+✅ **Stable Diffusion Inpainting** with **U-Net fine-tuning** on real PCB defect samples  
+🎯 Controlled synthesis via **clean image + defect mask + text prompt**  
+📈 Outperforms GauGAN baseline by ~4% recall at 2x augmentation  
+🎨 Mask precision and prompt clarity are the dominant factors governing generation quality  
+⚖️ Explored **Weighted Sampling** and **AMP** for low-data industrial training scenarios  
+✔️ Validated on **15 defect classes** using EfficientNet-B0
 
 ---
 
-## Problem
+## ⚠️ Problem
 
 Real-world PCB inspection datasets suffer from two fundamental challenges:
 
@@ -32,9 +32,9 @@ This study validates diffusion models as a practical solution for industrial def
 
 ---
 
-## Method — Stable Diffusion Inpainting
+## 🔧 Method — Stable Diffusion Inpainting
 
-A Stable Diffusion Inpainting model is fine-tuned on real PCB defect samples via LoRA.  
+A Stable Diffusion Inpainting model is fine-tuned on real PCB defect samples by training the U-Net encoder-decoder.  
 At inference, given a **clean image + defect mask + text prompt**, the model synthesizes  
 a localized defect in the masked region — enabling controlled, realistic augmentation.
 
@@ -42,17 +42,17 @@ a localized defect in the masked region — enabling controlled, realistic augme
 Prompt template: "A {class_name} {defect_type} defect"
 ```
 
-> Key finding: generation quality is highly sensitive to **mask precision** and  
+> 💡 **Key finding:** generation quality is highly sensitive to **mask precision** and  
 > **prompt semantic clarity** — quality over quantity applies here.
 
-**Why inpainting over other approaches?**  
+### Why inpainting over other approaches?
 Unlike patch-level generation (DDPM + DIP) or unconditional synthesis, SD Inpainting  
 preserves the surrounding PCB context and enables explicit spatial control via masks,  
 which is essential for industrial inspection where defect location and boundary matter.
 
 ---
 
-## Experimental Design
+## 📊 Experimental Design
 
 **Quantitative:** EfficientNet-B0 trained on a 15-class PCB defect dataset,  
 evaluated across augmentation methods and ratios (Precision / Recall / F1).
@@ -67,13 +67,13 @@ were designed to evaluate SD Inpainting behavior under varying conditions:
 | Dataset complexity | Higher structural complexity reduces generation controllability |
 | Weighted Sampling | Improves recall on minority defect classes |
 | AMP training | Faster training with no significant accuracy loss |
-| LoRA fine-tuning | Effectively injects domain knowledge from limited samples |
+| U-Net fine-tuning | Effectively injects domain knowledge from limited samples |
 
 ---
 
-## Results
+## 📈 Results
 
-### SD Inpainting vs. Baselines — Recall @ 2x Augmentation
+### 🥇 SD Inpainting vs. Baselines — Recall @ 2x Augmentation
 
 All methods trained on EfficientNet-B0, 15-class PCB defect classifier.
 
@@ -81,57 +81,56 @@ All methods trained on EfficientNet-B0, 15-class PCB defect classifier.
 |--------|--------|
 | GauGAN (generative baseline) | 82.9% |
 | DDPM + DIP (diffusion baseline) | 86.9% |
-| **SD Inpainting (this repo)** | **86.4%** |
+| ⭐ **SD Inpainting (this repo)** | **86.4%** |
 
-SD Inpainting achieves +3.5% over GauGAN while offering superior **spatial controllability**  
+SD Inpainting achieves **+3.5% over GauGAN** while offering superior **spatial controllability**  
 and **prompt-guided synthesis** — advantages that raw recall numbers do not fully capture.
 
-### Effect of Augmentation Ratio — SD Inpainting (single minority class)
+### 📊 Effect of Augmentation Ratio — SD Inpainting (single minority class)
 
 | Config | Train Size | Recall |
 |--------|------------|--------|
-| A — No augmentation | ~500 | ~0.78 |
-| B — 2x | ~1,050 | ~0.80 |
-| C — 3x | ~1,550 | ~0.82 |
-| D — 5x | ~3,200 | ~0.90 |
+| A — ❌ No augmentation | ~500 | ~0.78 |
+| B — 2️⃣ 2x | ~1,050 | ~0.80 |
+| C — 3️⃣ 3x | ~1,550 | ~0.82 |
+| D — 5️⃣ 5x | ~3,200 | ~0.90 |
 
 ---
 
-## Repository Structure
+## 📁 Repository Structure
 
 ```
 .
-├── data_preprocess/          # Data preparation scripts
-│   ├── pre_image_utils.py
-│   ├── pre_mask_utils.py
-│   ├── pre_prompt_utils.py
-│   └── final_check.py
-├── config/                   # Configuration files
-│   ├── train_config.py
-│   ├── prompts.json
-│   └── enums.py
-├── utils/                    # Utility modules
-│   ├── loader.py             # Data loading
-│   ├── datasets.py           # PyTorch Dataset
-│   ├── augmentation.py       # Image augmentation
-│   ├── prompt_utils.py       # Prompt handling
+├── 📦 data_preprocess/          # Data preparation scripts
+│   ├── pre_image_utils.py       # Resize & organize images
+│   ├── pre_mask_utils.py        # Interactive mask drawing
+│   ├── pre_prompt_utils.py      # Prompt generation
+│   └── final_check.py           # Validation
+├── ⚙️  config/                  # Configuration files
+│   ├── train_config.py          # Config class
+│   ├── prompts.json             # Dataset prompts
+│   └── enums.py                 # PromptMode enum
+├── 🔧 utils/                    # Utility modules
+│   ├── loader.py                # Data loading
+│   ├── datasets.py              # PyTorch Dataset
+│   ├── augmentation.py          # Image augmentation
+│   ├── prompt_utils.py          # Prompt handling
 │   └── ...
-├── docs/                     # Documentation
-│   ├── data_preparation.md
-│   ├── data_annotation.md
-│   ├── dataset_design.md
-│   ├── training.md
-│   ├── inference.md
-│   └── config.md
-├── SD_inpainting_train.py    # Training entry point
-├── SD_inpainting_predict.py  # Inference entry point
-├── requirements.txt
-└── README.md
+├── 📖 docs/                     # Documentation
+│   ├── data_preparation.md      # Step-by-step guide
+│   ├── dataset_design.md        # Best practices
+│   ├── training.md              # Training guide
+│   ├── inference.md             # Generation guide
+│   └── config.md                # Config reference
+├── 🚀 SD_inpainting_train.py    # Training entry point
+├── 🎯 SD_inpainting_predict.py  # Inference entry point
+├── 📋 requirements.txt          # Dependencies
+└── 📘 README.md                 # This file
 ```
 
 ---
 
-## Setup
+## 🔌 Setup
 
 ### Requirements
 
@@ -151,49 +150,50 @@ See [requirements.txt](requirements.txt) for full dependency list.
 | Train (BS=4) | 22.6 GB | RTX 4090 |
 | Inference | ~11.6 GB | RTX 4090 |
 
-> Inference may work on 12 GB GPUs; training requires 24 GB.
+> 💡 Inference may work on 12 GB GPUs; training requires 24 GB.
 
 ---
 
-## Quick Start
+## 🚀 Quick Start
 
-### 1. Prepare Data
+### 1️⃣ Prepare Data
 
 ```bash
-python data_preprocess/pre_image_utils.py      # Resize to 512×512
-python data_preprocess/pre_mask_utils.py       # Draw masks (interactive)
-python data_preprocess/pre_prompt_utils.py     # Generate text prompts
-python data_preprocess/final_check.py          # Verify completeness
+python data_preprocess/pre_image_utils.py      # 🖼️ Resize to 512×512
+python data_preprocess/pre_mask_utils.py       # 🎨 Draw masks (interactive)
+python data_preprocess/pre_prompt_utils.py     # 📝 Generate text prompts
+python data_preprocess/final_check.py          # ✅ Verify completeness
 ```
 
 📖 **[Full Data Preparation Guide](docs/data_preparation.md)**
 
-### 2. Train
+### 2️⃣ Train
 
 ```bash
-python SD_inpainting_train.py --data_dir ./data --project_name exp1
+python SD_inpainting_train.py --config config/exp1_example.json
 ```
 
-📖 **[Training Guide](docs/training.md)** | 📋 **[Config Reference](docs/config.md)**
+📖 **[Training Guide](docs/training.md)** | ⚙️ **[Config Reference](docs/config.md)**
 
-### 3. Inference
+### 3️⃣ Generate Defects
 
-```bash
-python SD_inpainting_predict.py \
-  --model_path checkpoints/exp1/best_model.pt \
-  --data_dir ./data
+```python
+from SD_inpainting_predict import Inpainter
+from config.enums import PromptMode
+
+inpainter = Inpainter(model_path="checkpoints/exp1/best_model.pt", data_name="exp1")
+inpainter.run(base_dir="datasets/test/base", mask_dir="datasets/test/masks", batch_size=18)
 ```
 
 📖 **[Inference Guide](docs/inference.md)**
 
 ---
 
-## Documentation
+## 📚 Documentation
 
 | Document | Purpose |
 |----------|---------|
 | [Data Preparation](docs/data_preparation.md) | Organize, annotate, prepare data |
-| [Data Annotation Details](docs/data_annotation.md) | Step-by-step annotation walkthrough |
 | [Dataset Design](docs/dataset_design.md) | Best practices + troubleshooting |
 | [Training Guide](docs/training.md) | Training parameters and techniques |
 | [Inference Guide](docs/inference.md) | Generate synthetic defects |
@@ -201,11 +201,11 @@ python SD_inpainting_predict.py \
 
 ---
 
-## Related Tool
+## 🔗 Related Tool
 
 The EfficientNet-B0 classifier used in this study is available as a standalone interactive toolkit:
 
-**[CNN Classifier Gradio Toolkit](https://github.com/Lien5757/cnn-classifier-gradio)**
+### **[CNN Classifier Gradio Toolkit](https://github.com/Lien5757/cnn-classifier-gradio)**
 
 | Feature | Description |
 |---------|-------------|
@@ -217,12 +217,12 @@ The EfficientNet-B0 classifier used in this study is available as a standalone i
 
 ---
 
-## Tech Stack
+## 🛠️ Tech Stack
 
 | Category | Tools |
 |----------|-------|
 | Generative Models | Stable Diffusion Inpainting (runwayml/stable-diffusion-inpainting) |
-| Fine-tuning | LoRA (via `peft`) |
+| Fine-tuning | U-Net encoder-decoder training on real PCB samples |
 | Classification | EfficientNet-B0, PyTorch |
 | Training Techniques | AMP, Weighted Sampling |
 | Image Processing | OpenCV |
@@ -230,7 +230,7 @@ The EfficientNet-B0 classifier used in this study is available as a standalone i
 
 ---
 
-## Citation
+## 📖 Citation
 
 ```bibtex
 @mastersthesis{lian2025pcb,
