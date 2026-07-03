@@ -1,42 +1,90 @@
 # Training Guide
 
-Fine-tune the SD Inpainting UNet on your PCB defect data:
+Fine-tune the SD Inpainting UNet on your PCB defect data.
 
+## Quick Start
+
+**Option 1: Using Config File (Recommended)**
+```bash
+python SD_inpainting_train.py --config config/exp1_example.json
+```
+
+**Option 2: Using CLI Parameters**
 ```bash
 python SD_inpainting_train.py \
-  --data_dir ./data \
+  --data_dir datasets/train/exp1 \
   --project_name exp1 \
   --num_epochs 500 \
-  --batch_size 1 \
-  --lr 5e-7 \
-  --weight_decay 1e-6 \
-  --warmup_ratio 0.05
+  --batch_size 4 \
+  --lr 1e-6 \
   --use_weighted_sampler
+```
+
+**Option 3: Config File + CLI Override**
+```bash
+# Config file defines base settings, CLI args override specific values
+python SD_inpainting_train.py --config config/exp1_example.json --num_epochs 300
+```
+
+## Configuration File
+
+All hyperparameters are defined in JSON config files (e.g., `config/exp1_example.json`):
+
+```json
+{
+  "data_dir": "datasets/train/exp1",
+  "project_name": "exp1",
+  "is_transform": true,
+  "num_epochs": 500,
+  "batch_size": 4,
+  "lr": 1e-06,
+  "weight_decay": 1e-06,
+  "use_warmup": true,
+  "warmup_ratio": 0.05,
+  "use_weighted_sampler": false,
+  "min_delta": 0.0001,
+  "save_interval": 200,
+  "plot_interval": 10
+}
 ```
 
 ## Parameters
 
 | Parameter | Default | Notes |
 |---|---|---|
-| `--data_dir` | — | Dataset path (must have `images/`, `masks/`, `texts/`) |
-| `--project_name` | — | Experiment name; checkpoints → `checkpoints/{project_name}/` |
-| `--num_epochs` | 500 | Early stopping applied based on validation loss |
-| `--batch_size` | 1 | Limited by VRAM (~20.6 GB for BS=1, ~22.6 GB for BS=4 on RTX 4090) |
-| `--lr` | 5e-7 | Learning rate for stable fine-tuning |
-| `--weight_decay` | 1e-6 | L2 regularization |
-| `--warmup_ratio` | 0.05 | Warmup as fraction of total steps |
-| `--use_weighted_sampler` | False | Upsample minority classes (critical for imbalanced data) |
+| `data_dir` | — | Dataset path (must have `images/`, `masks/`, `texts/`) |
+| `project_name` | `"exp1"` | Experiment name; auto-generates run ID (e.g., `exp1_base_20260703_10-30-45`) |
+| `is_transform` | `false` | Enable data augmentation (flip, rotate) during training |
+| `num_epochs` | `500` | Total training epochs |
+| `batch_size` | `1` | Limited by VRAM (~20.6 GB for BS=1, ~22.6 GB for BS=4 on RTX 4090) |
+| `lr` | `5e-7` | Learning rate for stable fine-tuning |
+| `weight_decay` | `1e-6` | L2 regularization |
+| `use_warmup` | `true` | Linear warmup schedule for first `warmup_ratio` steps |
+| `warmup_ratio` | `0.05` | Warmup as fraction of total steps |
+| `use_weighted_sampler` | `false` | Upsample minority classes (critical for imbalanced data) |
+| `min_delta` | `1e-4` | Minimum loss improvement threshold for tracking |
+| `save_interval` | `200` | Save checkpoint every N epochs |
+| `plot_interval` | `10` | Update loss plot every N epochs |
 
-## For Imbalanced Datasets
 
-Add `--use_weighted_sampler` to handle severe class imbalance:
+## Auto-Generated Metadata
 
-```bash
-python SD_inpainting_train.py \
-  --data_dir ./data \
-  --project_name exp1 \
-  --use_weighted_sampler
+After training completes, checkpoint directory contains:
+
 ```
+checkpoints/exp1_base_20260703_10-30-45/
+├── config.json          # Exact config used for this run
+├── metadata.json        # Training summary (loss, epochs, run_id)
+├── best_model.pt        # Best checkpoint (lowest loss)
+├── final_model.pt       # Final checkpoint after all epochs
+├── latest.pt            # Latest checkpoint (for resuming)
+└── training.log         # Full training log
+```
+
+**Benefits:**
+- `config.json` ensures full reproducibility
+- `metadata.json` logs final results for comparison
+- Auto-generated run ID (e.g., `exp1_base`, `exp1_transform_lr5e7`) encodes parameter changes
 
 ## GPU Memory
 

@@ -44,7 +44,7 @@ def save_prompts(data_dir: str, class_to_prompt_map: Dict[str, str]) -> None:
 
 if __name__ == "__main__":
     # ============ CONFIG: Modify dataset name and path ============
-    data_name = 'exp4'  # Choose from: exp2, exp3, exp4, exp5, exp5_v2, exp6
+    data_name = 'exp1'  # Choose from: exp2, exp3, exp4, exp5, exp5_v2, exp6
     data_dir = r'datasets\train\exp1'
 
     # Load prompts from unified config

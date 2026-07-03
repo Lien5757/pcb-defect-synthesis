@@ -83,41 +83,6 @@ nano config/my_experiment.json
 python SD_inpainting_train.py --config config/my_experiment.json
 ```
 
-## Error Handling
-
-### Missing data_dir
-```
-Configuration Error: Config file must contain 'data_dir' parameter.
-```
-**Solution:** Add `"data_dir"` to your JSON config file.
-
-### Invalid JSON Syntax
-```
-Configuration Error: Config file is not valid JSON
-```
-**Solution:** Validate your JSON file using an online JSON validator.
-
-### File Not Found
-```
-Configuration Error: Config file not found: path/to/config.json
-```
-**Solution:** Check that the file path is correct and the file exists.
-
-### Invalid Parameter Values
-```
-Configuration Error: Invalid parameters in config file
-```
-**Solution:** Check parameter types (int, float, bool, str) match the expected types.
-
-## CLI Arguments Override Config File
-
-When both config file and CLI arguments are provided, **CLI arguments take precedence**:
-
-```bash
-# Config file has batch_size=4
-python SD_inpainting_train.py --config config/exp1.json --batch_size 8
-# Result: batch_size will be 8
-```
 
 ## Tips
 
@@ -136,10 +101,4 @@ project_root/
 │   ├── my_experiment.json    # Your config
 │   └── prompts.json          # Prompt configuration (auto-loaded)
 └── SD_inpainting_train.py
-```
-
-Config files can be located anywhere; use absolute or relative paths:
-```bash
-python SD_inpainting_train.py --config ./my_configs/exp1.json
-python SD_inpainting_train.py --config /home/user/configs/exp1.json
 ```
