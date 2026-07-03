@@ -1,4 +1,4 @@
-# 🔬 PCB Defect Synthesis via Stable Diffusion Inpainting
+# PCB Defect Synthesis via Stable Diffusion Inpainting
 
 Fine-tuned Stable Diffusion Inpainting for industrial PCB defect data augmentation —  
 generating realistic, localized defects from clean images, binary masks, and text prompts,  
@@ -91,9 +91,9 @@ and **prompt-guided synthesis** — advantages that raw recall numbers do not fu
 | Config | Train Size | Recall |
 |--------|------------|--------|
 | A — ❌ No augmentation | ~500 | ~0.78 |
-| B — 2️⃣ 2x | ~1,050 | ~0.80 |
-| C — 3️⃣ 3x | ~1,550 | ~0.82 |
-| D — 5️⃣ 5x | ~3,200 | ~0.90 |
+| B — 2x | ~1,050 | ~0.80 |
+| C — 3x | ~1,550 | ~0.82 |
+| D — 5x | ~3,200 | ~0.90 |
 
 ---
 
@@ -101,31 +101,31 @@ and **prompt-guided synthesis** — advantages that raw recall numbers do not fu
 
 ```
 .
-├── 📦 data_preprocess/          # Data preparation scripts
+├── data_preprocess/             # Data preparation scripts
 │   ├── pre_image_utils.py       # Resize & organize images
 │   ├── pre_mask_utils.py        # Interactive mask drawing
 │   ├── pre_prompt_utils.py      # Prompt generation
 │   └── final_check.py           # Validation
-├── ⚙️  config/                  # Configuration files
+├── config/                      # Configuration files
 │   ├── train_config.py          # Config class
 │   ├── prompts.json             # Dataset prompts
 │   └── enums.py                 # PromptMode enum
-├── 🔧 utils/                    # Utility modules
+├── utils/                       # Utility modules
 │   ├── loader.py                # Data loading
 │   ├── datasets.py              # PyTorch Dataset
 │   ├── augmentation.py          # Image augmentation
 │   ├── prompt_utils.py          # Prompt handling
 │   └── ...
-├── 📖 docs/                     # Documentation
+├── docs/                        # Documentation
 │   ├── data_preparation.md      # Step-by-step guide
 │   ├── dataset_design.md        # Best practices
 │   ├── training.md              # Training guide
 │   ├── inference.md             # Generation guide
 │   └── config.md                # Config reference
-├── 🚀 SD_inpainting_train.py    # Training entry point
-├── 🎯 SD_inpainting_predict.py  # Inference entry point
-├── 📋 requirements.txt          # Dependencies
-└── 📘 README.md                 # This file
+├── SD_inpainting_train.py       # Training entry point
+├── SD_inpainting_predict.py     # Inference entry point
+├── requirements.txt             # Dependencies
+└── README.md                    # This file
 ```
 
 ---
@@ -165,7 +165,7 @@ python data_preprocess/pre_prompt_utils.py     # 📝 Generate text prompts
 python data_preprocess/final_check.py          # ✅ Verify completeness
 ```
 
-📖 **[Full Data Preparation Guide](docs/data_preparation.md)**
+**[Full Data Preparation Guide](docs/data_preparation.md)**
 
 ### 2️⃣ Train
 
@@ -173,7 +173,7 @@ python data_preprocess/final_check.py          # ✅ Verify completeness
 python SD_inpainting_train.py --config config/exp1_example.json
 ```
 
-📖 **[Training Guide](docs/training.md)** | ⚙️ **[Config Reference](docs/config.md)**
+**[Training Guide](docs/training.md)** | **[Config Reference](docs/config.md)**
 
 ### 3️⃣ Generate Defects
 
@@ -185,7 +185,7 @@ inpainter = Inpainter(model_path="checkpoints/exp1/best_model.pt", data_name="ex
 inpainter.run(base_dir="datasets/test/base", mask_dir="datasets/test/masks", batch_size=18)
 ```
 
-📖 **[Inference Guide](docs/inference.md)**
+**[Inference Guide](docs/inference.md)**
 
 ---
 
@@ -205,7 +205,7 @@ inpainter.run(base_dir="datasets/test/base", mask_dir="datasets/test/masks", bat
 
 The EfficientNet-B0 classifier used in this study is available as a standalone interactive toolkit:
 
-### **[CNN Classifier Gradio Toolkit](https://github.com/Lien5757/cnn-classifier-gradio)**
+**[CNN Classifier Gradio Toolkit](https://github.com/Lien5757/cnn-classifier-gradio)**
 
 | Feature | Description |
 |---------|-------------|
