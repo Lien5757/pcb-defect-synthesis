@@ -93,21 +93,22 @@ output/{project_name}/{model_type}_{timestamp}/
 
 ## Augmentation Options
 
-Inference supports real-time augmentation (helps model generalization):
+Inference supports real-time augmentation to generate more diverse synthetic defects:
 
 ```python
 inpainter = Inpainter(
     model_path=r"checkpoints\exp1\best_model.pt",
     data_name="exp1",
     enable_aug_on_base=True,    # Random flip/rotate base images
-    enable_aug_on_mask=True     # Apply matching augmentation to masks
+    enable_aug_on_mask=True     # Apply matching augmentation to masks (flip, rotate, scale, etc.)
 )
 ```
 
-**Benefits:**
-- Each generated batch gets different augmented versions
-- Helps detect mode collapse (model failure)
-- Produces more diverse synthetic samples
+**Purpose:**
+- **Base images:** Random flip / rotate for varied composition
+- **Masks:** Random flip / rotate / scale to create diverse defect positions and sizes
+- **Result:** Each batch generates different augmented versions for richer synthetic dataset
+- No impact on inference quality; purely for data diversity
 
 ## Troubleshooting
 
