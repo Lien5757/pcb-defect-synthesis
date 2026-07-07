@@ -127,9 +127,11 @@ inpainter = Inpainter(
 
 ### Batch Size
 
-- **Large batches** (18–32): Faster but more VRAM (~11.6 GB)
-- **Small batches** (4–8): Slower but memory-efficient
-- Adjust based on your GPU memory
+- **BS=1**: ~11.6 GB (baseline, single image per batch)
+- **BS=18**: ~22.6 GB (recommended for balanced speed/VRAM)
+- **Larger batches** (32+): Faster generation but requires ≥24 GB VRAM
+
+Adjust based on your GPU memory available.
 
 ---
 
