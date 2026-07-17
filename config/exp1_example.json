@@ -4,6 +4,7 @@
   "is_transform": true,
   "num_epochs": 500,
   "batch_size": 4,
+  "num_workers": 8,
   "lr": 1e-06,
   "weight_decay": 1e-06,
   "use_warmup": true,

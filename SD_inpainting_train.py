@@ -34,6 +34,7 @@ class StableDiffusionInpainterTrainer:
         self.is_transform = config.is_transform
         self.num_epochs = config.num_epochs
         self.batch_size = config.batch_size
+        self.num_workers = config.num_workers
         self.lr = config.lr
         self.weight_decay = config.weight_decay
         self.min_delta = config.min_delta
@@ -215,13 +216,13 @@ class StableDiffusionInpainterTrainer:
         self.logger.info(f"Data Dir: {self.data_dir}")
         self.logger.info(f"Project: {self.project_name}")
         self.logger.info(f"Num Epochs: {self.num_epochs}")
-        self.logger.info(f"Batch Size: {self.batch_size}")
+        self.logger.info(f"Batch Size: {self.batch_size} Num Workers: {self.num_workers}")
         self.logger.info(f"Learning Rate: {self.lr} Weight Decay: {self.weight_decay}")
         self.logger.info(f"Use Warmup: {self.use_warmup} Warmup Ratio: {self.warmup_ratio}")
         self.logger.info(f"Use Weighted Sampler: {self.use_weighted_sampler}")
         self.logger.info(f"Plot Interval: {self.plot_interval} epochs")
 
-        dataset, dataloader, sample_weights = load_train_data(self.data_dir, self.batch_size, self.is_transform, self.use_weighted_sampler)
+        dataset, dataloader, sample_weights = load_train_data(self.data_dir, self.batch_size, self.is_transform, self.use_weighted_sampler, self.num_workers)
 
         # Validate dataset
         try:

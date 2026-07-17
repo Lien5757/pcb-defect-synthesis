@@ -12,7 +12,8 @@ def load_train_data(
     data_dir: str,
     batch_size: int,
     isTransform: bool = False,
-    use_weighted_sampler: bool = True
+    use_weighted_sampler: bool = True,
+    num_workers: int = 8
 ) -> Tuple[InpaintingDataset, DataLoader, List[float]]:
     """Load training dataset with optional augmentation and weighted sampling.
 
@@ -57,7 +58,7 @@ def load_train_data(
         sample_weights = [1.0] * len(dataset)
 
     sampler = WeightedRandomSampler(weights=sample_weights, num_samples=len(sample_weights), replacement=True)
-    dataloader = DataLoader(dataset, batch_size=batch_size, sampler=sampler, num_workers=8, pin_memory=True)
+    dataloader = DataLoader(dataset, batch_size=batch_size, sampler=sampler, num_workers=num_workers, pin_memory=True)
     return dataset, dataloader, sample_weights
 
 def compute_soft_weights(group_labels: List[int], max_clip: float = 0.05) -> List[float]:

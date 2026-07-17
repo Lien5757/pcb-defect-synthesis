@@ -14,6 +14,7 @@ class TrainingConfig:
     is_transform: bool = False
     num_epochs: int = 500
     batch_size: int = 1
+    num_workers: int = 8
     lr: float = 5e-7
     weight_decay: float = 1e-6
     use_warmup: bool = True
