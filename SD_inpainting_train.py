@@ -334,6 +334,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--is_transform", action="store_true", help="Enable data augmentation")
     parser.add_argument("--num_epochs", type=int, default=None, help="Number of epochs")
     parser.add_argument("--batch_size", type=int, default=None, help="Batch size")
+    parser.add_argument("--num_workers", type=int, default=None, help="Number of DataLoader workers")
     parser.add_argument("--lr", type=float, default=None, help="Learning rate")
     parser.add_argument("--weight_decay", type=float, default=None, help="Weight decay")
     parser.add_argument("--use_warmup", action="store_true", help="Enable warmup")
