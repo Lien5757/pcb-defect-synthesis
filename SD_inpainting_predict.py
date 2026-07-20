@@ -2,6 +2,7 @@ import os
 import torch
 import numpy as np
 import logging
+import time
 from PIL import Image
 from datetime import datetime
 from typing import List, Optional
@@ -232,6 +233,7 @@ class Inpainter:
         total_batches = (len(base_images) + batch_size - 1) // batch_size
         self.logger.info(f"Starting inference on {len(base_images)} images ({total_batches} batches)")
 
+        inference_start_time = time.time()
         idx = 0
 
         for i in range(0, len(base_images), batch_size):
@@ -280,13 +282,18 @@ class Inpainter:
 
             idx += 1
 
-        self.logger.info(f'Inpainting process completed. Results saved to: {self.save_dir}')
+        elapsed_time = time.time() - inference_start_time
+        avg_time_per_image = elapsed_time / len(base_images) if base_images else 0
+        self.logger.info(
+            f'Inpainting completed: {len(base_images)} images in {elapsed_time:.1f}s '
+            f'({avg_time_per_image:.2f}s/image). Results: {self.save_dir}'
+        )
 
 if __name__ == "__main__":
     inpainter = Inpainter(
         model_path=r"checkpoints\exp1\best_model.pt",
         data_name="exp1",
-        enable_aug_on_base=True,
+        enable_aug_on_base=False,
         enable_aug_on_mask=True,
         scheduler_type="DDIM"
     )
