@@ -82,16 +82,22 @@ class Inpainter:
         log_path = os.path.join(self.save_dir, "inference.log")
         logger = logging.getLogger("Inpainter")
         logger.setLevel(logging.INFO)
+        logger.propagate = False
 
-        # Clear existing handlers to avoid stale file paths
-        logger.handlers.clear()
+        # Remove old file handlers to avoid stale file paths
+        for handler in logger.handlers[:]:
+            if isinstance(handler, logging.FileHandler):
+                logger.removeHandler(handler)
+                handler.close()
 
         formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 
-        ch = logging.StreamHandler()
-        ch.setLevel(logging.INFO)
-        ch.setFormatter(formatter)
-        logger.addHandler(ch)
+        # Add StreamHandler only if not already present
+        if not any(isinstance(h, logging.StreamHandler) and not isinstance(h, logging.FileHandler) for h in logger.handlers):
+            ch = logging.StreamHandler()
+            ch.setLevel(logging.INFO)
+            ch.setFormatter(formatter)
+            logger.addHandler(ch)
 
         fh = logging.FileHandler(log_path)
         fh.setLevel(logging.INFO)
