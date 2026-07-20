@@ -50,6 +50,7 @@ class Inpainter:
         except ValidationError as e:
             raise ValidationError(f"Model validation failed:\n{str(e)}")
 
+        self.model_path = model_path
         self.device = device or ("cuda:0" if torch.cuda.is_available() else "cpu")
         try:
             self.pipe = load_model(model_path, device=self.device, scheduler_type=scheduler_type)
@@ -82,6 +83,9 @@ class Inpainter:
         logger = logging.getLogger("Inpainter")
         logger.setLevel(logging.INFO)
 
+        # Clear existing handlers to avoid stale file paths
+        logger.handlers.clear()
+
         formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 
         ch = logging.StreamHandler()
@@ -89,11 +93,10 @@ class Inpainter:
         ch.setFormatter(formatter)
         logger.addHandler(ch)
 
-        if not any(isinstance(h, logging.FileHandler) for h in logger.handlers):
-            fh = logging.FileHandler(log_path)
-            fh.setLevel(logging.INFO)
-            fh.setFormatter(formatter)
-            logger.addHandler(fh)
+        fh = logging.FileHandler(log_path)
+        fh.setLevel(logging.INFO)
+        fh.setFormatter(formatter)
+        logger.addHandler(fh)
 
         return logger
 
@@ -220,6 +223,9 @@ class Inpainter:
             base_images = base_images[:target_total]
             match_mask_images = match_mask_images[:target_total]
 
+        total_batches = (len(base_images) + batch_size - 1) // batch_size
+        self.logger.info(f"Starting inference on {len(base_images)} images ({total_batches} batches)")
+
         idx = 0
 
         for i in range(0, len(base_images), batch_size):
@@ -227,6 +233,8 @@ class Inpainter:
             mask_batch_paths = match_mask_images[i:i+batch_size]
 
             try:
+                self.logger.info(f"Processing batch {idx + 1}/{total_batches} ({len(base_batch_paths)} images)")
+
                 # Load base images
                 base_batch = []
                 for p in base_batch_paths:
@@ -266,7 +274,7 @@ class Inpainter:
 
             idx += 1
 
-        self.logger.info('Inpainting process completed.')
+        self.logger.info(f'Inpainting process completed. Results saved to: {self.save_dir}')
 
 if __name__ == "__main__":
     inpainter = Inpainter(
