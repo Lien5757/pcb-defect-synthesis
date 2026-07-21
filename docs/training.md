@@ -37,6 +37,7 @@ All hyperparameters are defined in JSON config files (e.g., `config/exp1_example
   "is_transform": true,
   "num_epochs": 500,
   "batch_size": 4,
+  "num_workers": 8,
   "lr": 1e-06,
   "weight_decay": 1e-06,
   "use_warmup": true,
@@ -57,6 +58,7 @@ All hyperparameters are defined in JSON config files (e.g., `config/exp1_example
 | `is_transform` | `false` | Enable data augmentation (flip, rotate) during training |
 | `num_epochs` | `500` | Total training epochs |
 | `batch_size` | `1` | Limited by VRAM (~20.6 GB for BS=1, ~22.6 GB for BS=4 on RTX 4090) |
+| `num_workers` | `0` | DataLoader workers for parallel data loading (0=disabled, 4-8 recommended for CPU-bound loading) |
 | `lr` | `5e-7` | Learning rate for stable fine-tuning |
 | `weight_decay` | `1e-6` | L2 regularization |
 | `use_warmup` | `true` | Linear warmup schedule for first `warmup_ratio` steps |
