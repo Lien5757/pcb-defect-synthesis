@@ -37,7 +37,7 @@ Before starting, you must have:
 
 ---
 
-## Quick Start (5 min)
+## Quick Start (10 min)
 
 ```bash
 # 1. Resize images to 512×512
