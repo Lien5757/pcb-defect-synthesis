@@ -29,7 +29,7 @@ Before starting, you must have:
        └── ...
    ```
    - Each folder name (e.g., `class1`, `class2`) will become your defect class identifier
-   - Minimum 20–50 images per class recommended
+   - Recommend a concise name
 
 2. **Target dataset name** (e.g., `exp1`, `exp2`)
    - This name links to your prompts in `config/prompts.json`
