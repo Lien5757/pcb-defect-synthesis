@@ -11,6 +11,32 @@ datasets/train/exp1
 
 ---
 
+## Prerequisites
+
+Before starting, you must have:
+
+1. **Source directory** (`src_dir`) with images organized by class:
+   ```
+   your/dataset/path/
+   ├── class1/
+   │   ├── image1.jpg
+   │   ├── image2.jpg
+   │   └── ...
+   ├── class2/
+   │   ├── image1.jpg
+   │   └── ...
+   └── class3/
+       └── ...
+   ```
+   - Each folder name (e.g., `class1`, `class2`) will become your defect class identifier
+   - Minimum 20–50 images per class recommended
+
+2. **Target dataset name** (e.g., `exp1`, `exp2`)
+   - This name links to your prompts in `config/prompts.json`
+   - You'll reference it as `data_name` in training and inference
+
+---
+
 ## Quick Start (5 min)
 
 ```bash
@@ -78,7 +104,20 @@ python data_preprocess/pre_image_utils.py
 | `"resize"` | Resize only, keep original filenames | You want to preserve original naming |
 | `"rename"` | Resize + rename by class with sequential numbering | You need standardized `class_XXX.png` format |
 
-**Output:** `{dst_dir}/images/<class>/` contains resized 512×512 images
+**Output:**
+```
+datasets/train/exp1/
+└── images/
+    ├── class1/
+    │   ├── image1.jpg
+    │   ├── image2.jpg
+    │   └── ...
+    ├── class2/
+    │   └── ...
+    └── class3/
+        └── ...
+```
+Resized 512×512 images organized by class
 
 ---
 
@@ -118,7 +157,20 @@ python data_preprocess/pre_mask_utils.py
 
 **Tip:** Rough freehand masks are fine. Natural edge variation helps the model learn diverse defect shapes—do not over-smooth or over-trace.
 
-**Output:** `masks/<class>/` with same filenames as images
+**Output:**
+```
+datasets/train/exp1/
+└── masks/
+    ├── class1/
+    │   ├── image1.png
+    │   ├── image2.png
+    │   └── ...
+    ├── class2/
+    │   └── ...
+    └── class3/
+        └── ...
+```
+Binary masks (same filenames as images)
 
 ---
 
@@ -128,6 +180,41 @@ Create semantic descriptions for each defect class from centralized configuratio
 
 **File:** `data_preprocess/pre_prompt_utils.py`  
 **Config:** `config/prompts.json` (defines all prompts by dataset name)
+
+### ⚠️ Before Running: Customize Prompts
+
+**You MUST edit `config/prompts.json` first** to add prompts for your dataset.
+
+**Format:**
+```json
+{
+  "data_name": {
+    "class_name": "prompt content",
+    "class_name": "prompt content",
+    ...
+  }
+}
+```
+
+**Example (exp1 dataset):**
+```json
+{
+  "exp1": {
+    "0_crash": "A crash defect on tray",
+    "1_scratch": "A scratch defect on tray",
+    "2_white_contamination": "White contamination defect on tray",
+    "3_red_contamination": "Red contamination defect on tray",
+    "4_foreign_matter": "Foreign matter defect on tray"
+  }
+}
+```
+
+**Key Points:**
+- `data_name` must match the parameter you'll use in training (e.g., `exp1`, `exp2`)
+- Class names must exactly match your folder names in `datasets/train/{data_name}/images/`
+- Prompts should be specific and descriptive (see Prompt Guidelines below)
+
+---
 
 **Setup:**
 ```python
@@ -150,7 +237,20 @@ python data_preprocess/pre_prompt_utils.py
 - **Consistent** — Use similar structure across related classes
 - **Concrete** — Avoid vague or compound concepts
 
-**Output:** `texts/<class>/` with one prompt per image file
+**Output:**
+```
+datasets/train/exp1/
+└── texts/
+    ├── class1/
+    │   ├── image1.txt
+    │   ├── image2.txt
+    │   └── ...
+    ├── class2/
+    │   └── ...
+    └── class3/
+        └── ...
+```
+One prompt per image file (matching image filenames)
 
 ---
 
@@ -173,10 +273,19 @@ python data_preprocess/final_check.py
 ```
 
 **Output:**
-- ✓ "All data is properly paired!" → Ready to train
-- ✗ "Found N missing files" → Lists which images need attention
+```
+datasets/train/exp1/
+├── images/        # ✓ All images resized to 512×512
+├── masks/         # ✓ All masks annotated
+└── texts/         # ✓ All prompts generated
+```
 
-**Action:** If files are missing, return to Step 2 or 3 to complete annotation.
+**Success Message:**
+- ✓ "All data is properly paired!" → Ready to train
+
+**If Issues:**
+- ✗ "Found N missing files" → Lists which images need attention
+- **Action:** Return to Step 2 (masks) or Step 3 (prompts) to complete missing files
 
 ---
 
