@@ -2,6 +2,7 @@ import os
 import torch
 import numpy as np
 import logging
+import time
 from PIL import Image
 from datetime import datetime
 from typing import List, Optional
@@ -50,6 +51,7 @@ class Inpainter:
         except ValidationError as e:
             raise ValidationError(f"Model validation failed:\n{str(e)}")
 
+        self.model_path = model_path
         self.device = device or ("cuda:0" if torch.cuda.is_available() else "cpu")
         try:
             self.pipe = load_model(model_path, device=self.device, scheduler_type=scheduler_type)
@@ -81,19 +83,27 @@ class Inpainter:
         log_path = os.path.join(self.save_dir, "inference.log")
         logger = logging.getLogger("Inpainter")
         logger.setLevel(logging.INFO)
+        logger.propagate = False
+
+        # Remove old file handlers to avoid stale file paths
+        for handler in logger.handlers[:]:
+            if isinstance(handler, logging.FileHandler):
+                logger.removeHandler(handler)
+                handler.close()
 
         formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
 
-        ch = logging.StreamHandler()
-        ch.setLevel(logging.INFO)
-        ch.setFormatter(formatter)
-        logger.addHandler(ch)
+        # Add StreamHandler only if not already present
+        if not any(isinstance(h, logging.StreamHandler) and not isinstance(h, logging.FileHandler) for h in logger.handlers):
+            ch = logging.StreamHandler()
+            ch.setLevel(logging.INFO)
+            ch.setFormatter(formatter)
+            logger.addHandler(ch)
 
-        if not any(isinstance(h, logging.FileHandler) for h in logger.handlers):
-            fh = logging.FileHandler(log_path)
-            fh.setLevel(logging.INFO)
-            fh.setFormatter(formatter)
-            logger.addHandler(fh)
+        fh = logging.FileHandler(log_path)
+        fh.setLevel(logging.INFO)
+        fh.setFormatter(formatter)
+        logger.addHandler(fh)
 
         return logger
 
@@ -220,6 +230,10 @@ class Inpainter:
             base_images = base_images[:target_total]
             match_mask_images = match_mask_images[:target_total]
 
+        total_batches = (len(base_images) + batch_size - 1) // batch_size
+        self.logger.info(f"Starting inference on {len(base_images)} images ({total_batches} batches)")
+
+        inference_start_time = time.time()
         idx = 0
 
         for i in range(0, len(base_images), batch_size):
@@ -227,6 +241,8 @@ class Inpainter:
             mask_batch_paths = match_mask_images[i:i+batch_size]
 
             try:
+                self.logger.info(f"Processing batch {idx + 1}/{total_batches} ({len(base_batch_paths)} images)")
+
                 # Load base images
                 base_batch = []
                 for p in base_batch_paths:
@@ -266,13 +282,18 @@ class Inpainter:
 
             idx += 1
 
-        self.logger.info('Inpainting process completed.')
+        elapsed_time = time.time() - inference_start_time
+        avg_time_per_image = elapsed_time / len(base_images) if base_images else 0
+        self.logger.info(
+            f'Inpainting completed: {len(base_images)} images in {elapsed_time:.1f}s '
+            f'({avg_time_per_image:.2f}s/image). Results: {self.save_dir}'
+        )
 
 if __name__ == "__main__":
     inpainter = Inpainter(
         model_path=r"checkpoints\exp1\best_model.pt",
         data_name="exp1",
-        enable_aug_on_base=True,
+        enable_aug_on_base=False,
         enable_aug_on_mask=True,
         scheduler_type="DDIM"
     )
